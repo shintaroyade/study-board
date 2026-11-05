@@ -1,0 +1,20 @@
+rules_version = '2';
+// 勉強会アプリ用のルール。
+// URLを知っている人は誰でも読み書きできます(ログイン不要)。
+// アプリが使う5つの場所以外への書き込みは禁止しています。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function small() {
+      // 削除はOK。書き込みは項目数20個まで(いたずらで巨大なデータを入れられないように)
+      return request.resource == null || request.resource.data.size() <= 20;
+    }
+
+    match /members/{id}  { allow read: if true; allow write: if small(); }
+    match /events/{id}   { allow read: if true; allow write: if small(); }
+    match /rsvps/{id}    { allow read: if true; allow write: if small(); }
+    match /grammar/{id}  { allow read: if true; allow write: if id == "progress"; }
+    match /settings/{id} { allow read: if true; allow write: if id == "app"; }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B1222">
+<title>英語勉強会ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Unbounded:wght@500;700;800&display=swap">
+<style>
+/* Layout: one-column mobile app — sticky header, tab views, fixed bottom tab bar, bottom sheets for detail/edit. Dark-first. */
+:root{
+  --bg:#0B1222; --surface:#121B30; --surface2:#1A2540; --line:#26324F;
+  --fg:#E8EEF9; --muted:#8C9AB8;
+  --lime:#C6F432; --lime-text:#C6F432; --ink:#0B1222;
+  --cyan:#22D3EE; --orange:#FF8A3D; --violet:#A78BFA;
+  --gold:#F5C542; --danger:#FF6B6B;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --display:"Unbounded","Noto Sans JP",system-ui,sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --r:18px;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#EEF2F8; --surface:#FFFFFF; --surface2:#E4EAF4; --line:#D2DAE8;
+    --fg:#0F172A; --muted:#5B6782; --lime:#C6F432; --lime-text:#4A7300; --ink:#0B1222;
+    --cyan:#0891B2; --orange:#E2620E; --violet:#7C5CE0; --gold:#B8860B; --danger:#D93F3F;
+    --shadow:0 8px 24px rgba(15,23,42,.10); color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#EEF2F8; --surface:#FFFFFF; --surface2:#E4EAF4; --line:#D2DAE8;
+  --fg:#0F172A; --muted:#5B6782; --lime:#C6F432; --lime-text:#4A7300; --ink:#0B1222;
+  --cyan:#0891B2; --orange:#E2620E; --violet:#7C5CE0; --gold:#B8860B; --danger:#D93F3F;
+  --shadow:0 8px 24px rgba(15,23,42,.10); color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+img{max-width:100%}
+:root{padding-top:env(safe-area-inset-top,0px)}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:12px}
+.brand{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15px;flex:none}
+.brand-name{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-sub{display:block;font-size:11px;color:var(--muted);font-family:var(--body);font-weight:500;letter-spacing:.06em}
+.icon-btn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.icon-btn svg{width:20px;height:20px}
+.av{border-radius:50%;display:inline-grid;place-items:center;font-weight:700;color:#0B1222;flex:none;font-size:13px;width:30px;height:30px}
+.av.lg{width:46px;height:46px;font-size:18px}
+
+main{padding-block:16px 120px}
+.view{display:flex;flex-direction:column;gap:16px}
+.banner{padding:10px 14px;border-radius:12px;background:var(--surface2);color:var(--muted);font-size:13px}
+.banner.warn{border:1px solid var(--orange);color:var(--fg)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:6px 2px 0}
+.sec-h h2{font-family:var(--display);font-size:15px;font-weight:700;margin:0;letter-spacing:.02em}
+.sec-h .link{background:none;border:0;color:var(--lime-text);font-weight:700;font-size:13px;padding:6px 0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* hero next */
+.hero{position:relative;overflow:hidden;padding:20px;border-radius:22px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--tc,var(--cyan)) 30%,transparent),transparent 70%);pointer-events:none}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--muted)}
+.hero h3{font-family:var(--display);font-size:22px;line-height:1.3;margin:6px 0 4px;text-wrap:balance;position:relative}
+.countdown{display:flex;gap:8px;margin:14px 0;position:relative}
+.cd{background:var(--surface2);border-radius:12px;padding:8px 12px;min-width:64px;text-align:center}
+.cd b{display:block;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
+.cd span{font-size:11px;color:var(--muted)}
+.meta{display:grid;gap:6px;font-size:14px;position:relative}
+.meta div{display:flex;gap:8px;align-items:flex-start;min-width:0}
+.meta .k{color:var(--muted);flex:none;width:3.2em;font-size:12px;padding-top:2px}
+.meta a{color:var(--lime-text);word-break:break-all}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--tc) 18%,transparent);color:var(--tc);position:relative}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tc)}
+.t-grammar{--tc:var(--cyan)} .t-lesson{--tc:var(--orange)} .t-other{--tc:var(--violet)}
+
+.rsvp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;position:relative}
+.rsvp button{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);font-weight:700;font-size:14px}
+.rsvp button.on.yes{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.rsvp button.on.no{background:var(--danger);color:#fff;border-color:var(--danger)}
+.rsvp button.on.maybe{background:var(--gold);color:#1a1300;border-color:var(--gold)}
+.goers{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--muted);flex-wrap:wrap;position:relative}
+.stack{display:flex}
+.stack .av{margin-left:-8px;border:2px solid var(--surface);width:30px;height:30px}
+.stack .av:first-child{margin-left:0}
+
+.btn{min-height:48px;padding:0 18px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.btn.line{background:#06C755;border-color:#06C755;color:#fff}
+.btn.danger{background:transparent;border-color:var(--danger);color:var(--danger)}
+.btn.block{width:100%}
+.btn svg{width:18px;height:18px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>.btn{flex:1 1 140px}
+
+/* list items */
+.list{display:flex;flex-direction:column;gap:8px}
+.ev{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.ev .date{flex:none;width:52px;text-align:center;border-radius:10px;padding:6px 0;background:color-mix(in srgb,var(--tc) 16%,transparent)}
+.ev .date b{display:block;font-family:var(--display);font-size:18px;line-height:1.1;color:var(--tc)}
+.ev .date span{font-size:11px;color:var(--muted)}
+.ev .body{flex:1;min-width:0}
+.ev .title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.past{opacity:.7}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.stat{display:flex;align-items:center;gap:14px}
+.flame{font-family:var(--display);font-size:34px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums;line-height:1}
+.bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--lime));border-radius:99px;transition:width .6s ease}
+
+/* calendar */
+.cal-head{display:flex;align-items:center;gap:8px}
+.cal-head h2{flex:1;font-family:var(--display);font-size:20px;margin:0;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;background:var(--surface2);border-radius:12px;padding:3px;border:1px solid var(--line)}
+.seg button{border:0;background:none;padding:8px 14px;border-radius:9px;font-weight:700;font-size:13px;color:var(--muted);min-height:36px}
+.seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow{font-size:11px;text-align:center;color:var(--muted);font-weight:700;padding:4px 0}
+.dow.sun{color:var(--danger)} .dow.sat{color:var(--cyan)}
+.day{min-height:68px;border-radius:12px;background:var(--surface);border:1px solid var(--line);padding:6px 5px;display:flex;flex-direction:column;gap:3px;text-align:left;min-width:0}
+.day.out{opacity:.35}
+.day .n{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.day.today{border-color:var(--lime);box-shadow:inset 0 0 0 1px var(--lime)}
+.day.today .n{background:var(--lime);color:var(--ink);border-radius:99px;padding:0 6px;align-self:flex-start}
+.chip{display:block;font-size:10px;line-height:1.4;padding:1px 4px;border-radius:5px;background:color-mix(in srgb,var(--tc) 22%,transparent);color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--tc)}
+@media (max-width:480px){.chip{font-size:0;height:6px;padding:0;border-left:0;background:var(--tc)}}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;background:var(--tc)}
+.weekday{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.weekday:last-child{border-bottom:0}
+.weekday .wd{width:48px;flex:none;text-align:center}
+.weekday .wd b{display:block;font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums}
+.weekday .wd span{font-size:11px;color:var(--muted)}
+.weekday.today .wd b{color:var(--lime-text)}
+.weekday .items{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.add-day{border:1px dashed var(--line);background:none;border-radius:12px;padding:8px;color:var(--muted);font-size:13px;text-align:left}
+
+/* ranking */
+.rank{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.rank.me{border-color:var(--lime)}
+.rank .pos{width:34px;text-align:center;font-family:var(--display);font-size:18px;font-weight:800;flex:none;font-variant-numeric:tabular-nums}
+.rank .who{flex:1;min-width:0}
+.rank .who b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .cnt{font-family:var(--display);font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.rank .cnt small{font-family:var(--body);font-size:11px;color:var(--muted);margin-left:2px}
+.streak{font-size:12px;color:var(--orange);font-weight:700}
+.nudge{font-size:12px;color:var(--lime-text);font-weight:700}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:8px}
+.pod{text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 6px 12px;min-width:0}
+.pod .medal{font-size:28px;line-height:1}
+.pod b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px}
+.pod .cnt{font-family:var(--display);font-size:22px;font-weight:800}
+.pod.p1{padding-top:22px;border-color:var(--gold)}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--fg);border:1px solid var(--line)}
+
+/* grammar */
+.unit{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.unit .no{width:28px;flex:none;font-family:var(--display);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.unit .nm{flex:1;min-width:0}
+.unit .nm b{display:block}
+.unit .evs{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.unit .evs button{font-size:11px;border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:2px 8px}
+.st{min-width:84px;min-height:38px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--surface2);color:var(--muted)}
+.st.doing{background:color-mix(in srgb,var(--cyan) 20%,transparent);color:var(--cyan);border-color:var(--cyan)}
+.st.done{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.unit.done .nm b{opacity:.75}
+.big-pct{font-family:var(--display);font-size:44px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+
+/* members */
+.mem{display:flex;gap:14px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.mem .info{flex:1;min-width:0}
+.mem .info b{font-size:16px}
+.mem .skill{display:inline-block;font-size:12px;font-weight:700;color:var(--orange);margin-top:2px}
+.mem .nums{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.mem .nums b{font-family:var(--display);font-size:15px;color:var(--fg);font-weight:700;margin-right:2px}
+.tbd{display:flex;gap:8px;flex-wrap:wrap}
+.tbd span{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:99px;background:var(--surface2);font-size:13px;font-weight:700}
+.tbd .av{width:24px;height:24px;font-size:11px}
+
+/* tab bar */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs button{border:0;background:none;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--muted);min-height:58px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.on{color:var(--lime-text)}
+nav.tabs button.on svg{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--lime) 60%,transparent))}
+.fab{position:fixed;z-index:24;right:max(18px,calc(env(safe-area-inset-right,0px) + 18px));bottom:calc(76px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:18px;border:0;background:var(--lime);color:var(--ink);display:grid;place-items:center;box-shadow:0 10px 24px color-mix(in srgb,var(--lime) 35%,transparent)}
+.fab svg{width:26px;height:26px}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(3,8,20,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}
+.scrim.open{opacity:1}
+.sheet{width:100%;max-width:640px;max-height:88vh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;border:1px solid var(--line);padding:10px max(18px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));transform:translateY(24px);transition:transform .22s ease}
+.scrim.open .sheet{transform:none}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-family:var(--display);font-size:19px;margin:0 0 4px;text-wrap:balance}
+.sheet .stackv{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.field input,.field select,.field textarea{min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);padding:10px 12px;width:100%;min-width:0}
+.field textarea{min-height:84px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px}
+@media (max-width:440px){.three{grid-template-columns:1fr 1fr}.three .field:first-child{grid-column:1/-1}}
+.typepick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.typepick button{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);font-weight:700;font-size:13px}
+.typepick button.on{background:color-mix(in srgb,var(--tc) 22%,transparent);border-color:var(--tc);color:var(--fg)}
+.inline{display:flex;gap:8px}
+.inline input{flex:1}
+.inline .btn{min-height:46px;padding:0 12px;font-size:13px;flex:none}
+.att{display:flex;gap:8px;flex-wrap:wrap}
+.att button{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border-radius:99px;border:1px solid var(--line);background:var(--surface2);font-size:13px;font-weight:700;min-height:38px}
+.att button .av{width:28px;height:28px;font-size:12px}
+.att button.on{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.copybox{width:100%;min-height:150px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);padding:12px;font-size:13px}
+.divider{height:1px;background:var(--line);margin:4px 0}
+.rsvp-list{display:grid;gap:4px;font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(10px);z-index:60;background:var(--fg);color:var(--bg);font-weight:700;font-size:14px;padding:10px 18px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;height:100%}
+.empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:14px;border:1px dashed var(--line);border-radius:16px}
+.reg{border:1px solid var(--lime);background:color-mix(in srgb,var(--lime) 8%,var(--surface))}
+.reg h3{font-family:var(--display);font-size:18px;margin:0 0 4px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <button class="brand" id="brandBtn" aria-label="設定を開く">
+      <span class="logo" id="logo">E</span>
+      <span style="min-width:0">
+        <span class="brand-name" id="appName">英語勉強会(仮)</span>
+        <span class="brand-sub">GRAMMAR × MEMBER LESSONS</span>
+      </span>
+    </button>
+    <button class="icon-btn" id="meBtn" aria-label="自分のプロフィール"></button>
+    <button class="icon-btn" id="setBtn" aria-label="設定">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="status"></div>
+  <section class="view" id="v-home"></section>
+  <section class="view" id="v-cal" hidden></section>
+  <section class="view" id="v-rank" hidden></section>
+  <section class="view" id="v-gram" hidden></section>
+  <section class="view" id="v-mem" hidden></section>
+</main>
+
+<button class="fab" id="fab" aria-label="予定を追加">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabs" aria-label="メニュー">
+  <div class="in">
+    <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>ホーム</button>
+    <button data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>カレンダー</button>
+    <button data-tab="rank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>ランキング</button>
+    <button data-tab="gram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 21.5"/><path d="M8 7h7M8 11h5"/></svg>文法</button>
+    <button data-tab="mem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.2a5 5 0 0 1 5.5 4.8"/></svg>メンバー</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status"></div>
+<canvas id="fx"></canvas>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+</body>
+</html>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</body>
+</html>
+<script src="firebase-config.js"></script>
+</body>
+</html>
+<script>
+(() => {
+/* ---------- constants ---------- */
+const UNITS = [
+  ["bunkei","文型","5文型・SVOC"],["hinshi","品詞","名詞・動詞・形容詞・副詞"],["jisei","時制","現在・過去・未来・進行形"],
+  ["kanryo","完了形","現在完了・過去完了"],["jodoushi","助動詞","can / must / should …"],["ukemi","受動態","be + 過去分詞"],
+  ["futeishi","不定詞","to + 動詞の原形"],["doumeishi","動名詞","-ing の名詞的用法"],["bunshi","分詞","現在分詞・過去分詞・分詞構文"],
+  ["hikaku","比較","原級・比較級・最上級"],["kankei","関係詞","関係代名詞・関係副詞"],["katei","仮定法","if節・I wish"],
+  ["wahou","話法","直接話法・間接話法"],["meishi","名詞・冠詞","可算/不可算・a / the"],["zenchi","前置詞","in / on / at …"],
+  ["setsuzoku","接続詞","等位・従属接続詞"],["tokushu","特殊構文","倒置・強調・省略"]
+];
+const UNIT_MAP = Object.fromEntries(UNITS.map(u=>[u[0],u]));
+const TYPES = {grammar:"英文法",lesson:"メンバー授業",other:"その他"};
+const WD = ["日","月","火","水","木","金","土"];
+const AV_COLORS = ["#C6F432","#22D3EE","#FF8A3D","#A78BFA","#F5C542","#5EEAD4","#F472B6","#93C5FD"];
+
+/* ---------- state ---------- */
+const S = {members:{}, events:[], rsvps:[], progress:{}, appName:"", ready:{}, canWrite:true};
+let db=null, uid=null, myId=null;
+let tab="home", calMode="month", calCursor=new Date(), rankMode="all";
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ls = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}, del(k){try{localStorage.removeItem(k)}catch(e){}}};
+
+/* ---------- dates ---------- */
+const pad = n=>String(n).padStart(2,"0");
+const ymd = d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pd = s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const todayStr = ()=>ymd(new Date());
+const md = s=>{const d=pd(s);return `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})`};
+const evStart = e=>{const d=pd(e.date);const [h,m]=(e.start||"00:00").split(":").map(Number);d.setHours(h,m);return d};
+const evEnd = e=>{const d=pd(e.date);const [h,m]=(e.end||e.start||"23:59").split(":").map(Number);d.setHours(h,m);return d};
+const timeRange = e=>e.start?`${e.start}${e.end?"〜"+e.end:""}`:"時間未定";
+const mapUrl = place=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(place);
+
+/* ---------- helpers ---------- */
+function hashColor(id){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return AV_COLORS[h%AV_COLORS.length]}
+function avatar(id,cls=""){const m=S.members[id];const n=m?.name||"?";return `<span class="av ${cls}" style="background:${hashColor(id)}" aria-hidden="true">${esc([...n.replace(/[(（].*$/,"").trim()||n][0]||"?")}</span>`}
+const mname = id=>S.members[id]?.name||"(未登録)";
+const sortedEvents = ()=>[...S.events].sort((a,b)=>(a.date+(a.start||"")).localeCompare(b.date+(b.start||"")));
+const memberIds = ()=>Object.keys(S.members).sort((a,b)=>(S.members[a].joinedAt||0)-(S.members[b].joinedAt||0));
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("on"),2200)}
+const newId = ()=>"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ---------- stats ---------- */
+function stats(){
+  const t=todayStr(), month=t.slice(0,7);
+  const recorded = sortedEvents().filter(e=>e.date<=t && Array.isArray(e.attended) && e.attended.length);
+  const out={};
+  for(const id of Object.keys(S.members)){
+    const att = recorded.filter(e=>e.attended.includes(id));
+    let streak=0; for(let i=recorded.length-1;i>=0;i--){ if(recorded[i].attended.includes(id)) streak++; else break; }
+    const taught = sortedEvents().filter(e=>e.type==="lesson"&&e.hostId===id);
+    const taughtDone = taught.filter(e=>e.date<=t);
+    const count=att.length;
+    const badges=[];
+    if(count>=1)badges.push("🎉 初参加");
+    if(count>=5)badges.push("⭐ 5回");
+    if(count>=10)badges.push("🏅 10回");
+    if(count>=30)badges.push("👑 30回");
+    if(streak>=3)badges.push("🔥 3連続");
+    if(streak>=5)badges.push("💥 5連続");
+    if(taughtDone.length>=1)badges.push("🎤 授業デビュー");
+    out[id]={count, month:att.filter(e=>e.date.startsWith(month)).length, streak, taught, taughtDone, badges};
+  }
+  return out;
+}
+
+/* ---------- copy text ---------- */
+function lineText(e){
+  const L=[`📅 ${md(e.date)} ${timeRange(e)}`];
+  if(e.place) L.push(`📍 ${e.place}${e.map?`\n${e.map}`:""}`);
+  const content = e.type==="grammar"&&e.unit ? `${UNIT_MAP[e.unit]?.[1]||""}${e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?`(${e.title})`:""}` : e.title;
+  L.push(`📖 ${TYPES[e.type]||""}:${content}`);
+  if(e.hostId) L.push(`🙋 担当:${mname(e.hostId)}`);
+  if(e.memo) L.push(`📝 ${e.memo}`);
+  if(e.link) L.push(`📎 ${e.link}`);
+  L.push("参加できる人は返信してね!");
+  return L.join("\n");
+}
+function weekRange(){const d=new Date();d.setHours(0,0,0,0);const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const sun=new Date(mon);sun.setDate(mon.getDate()+6);return [ymd(mon),ymd(sun)]}
+function weekText(){
+  const [a,b]=weekRange();const evs=sortedEvents().filter(e=>e.date>=a&&e.date<=b);
+  if(!evs.length) return null;
+  const head=`【今週の${S.appName||"勉強会"}】${md(a)}〜${md(b)}`;
+  return [head,...evs.map(e=>{
+    const c = e.type==="grammar"&&e.unit?UNIT_MAP[e.unit]?.[1]:e.title;
+    return `\n▶ ${md(e.date)} ${timeRange(e)}\n  ${TYPES[e.type]}:${c}${e.hostId?` / 担当 ${mname(e.hostId)}`:""}${e.place?`\n  📍 ${e.place}`:""}${e.map?`\n  ${e.map}`:""}`;
+  }),"\n参加できる人は返信してね!"].join("\n");
+}
+async function copy(text){
+  try{ await navigator.clipboard.writeText(text); toast("コピーしました。LINEに貼り付けてね"); }
+  catch(err){
+    openSheet(`<h3>コピー用テキスト</h3><p class="muted small">自動コピーできなかったので、下の文を長押しして全部コピーしてください。</p><textarea class="copybox" id="cpbox" readonly>${esc(text)}</textarea><button class="btn block" data-close>閉じる</button>`);
+    const t=$("#cpbox"); t.focus(); t.select();
+  }
+}
+
+/* ---------- render: home ---------- */
+function eventRow(e){
+  const d=pd(e.date); const past = evEnd(e)<new Date();
+  const sub=[timeRange(e), e.place, e.hostId?`担当 ${mname(e.hostId)}`:""].filter(Boolean).join(" · ");
+  const title = e.type==="grammar"&&e.unit ? `${UNIT_MAP[e.unit]?.[1]}${e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?" — "+e.title:""}` : e.title;
+  return `<button class="ev t-${e.type}${past?" past":""}" data-ev="${esc(e.id)}"><span class="date"><b>${d.getDate()}</b><span>${d.getMonth()+1}月 ${WD[d.getDay()]}</span></span><span class="body"><span class="title">${esc(title||"(タイトルなし)")}</span><span class="sub">${esc(sub)}</span></span><span class="tag t-${e.type}" style="flex:none">${TYPES[e.type]}</span></button>`;
+}
+function rsvpOf(eid){const r={};for(const x of S.rsvps)if(x.eventId===eid)r[x.uid]=x.status;return r}
+function rsvpBlock(e){
+  const r=rsvpOf(e.id); const mine=myId?r[myId]:null;
+  const yes=Object.keys(r).filter(k=>r[k]==="yes"&&S.members[k]);
+  const maybe=Object.keys(r).filter(k=>r[k]==="maybe"&&S.members[k]);
+  return `<div class="rsvp" role="group" aria-label="出欠">
+    ${[["yes","参加"],["maybe","未定"],["no","不参加"]].map(([k,l])=>`<button class="${k}${mine===k?" on":""}" data-rsvp="${k}" data-eid="${esc(e.id)}" ${S.canWrite?"":"disabled"}>${l}</button>`).join("")}
+  </div>
+  <div class="goers">${yes.length?`<span class="stack">${yes.slice(0,7).map(id=>avatar(id)).join("")}</span><span>参加予定 <b style="color:var(--fg)">${yes.length}人</b>${maybe.length?` · 未定 ${maybe.length}人`:""}</span>`:`<span>まだ参加表明はありません${maybe.length?` · 未定 ${maybe.length}人`:""}</span>`}</div>`;
+}
+function renderHome(){
+  const st=stats(); const now=new Date();
+  const upcoming=sortedEvents().filter(e=>evEnd(e)>=now);
+  const next=upcoming[0];
+  let h="";
+  if(!myId || !S.members[myId]){
+    h+=`<div class="card reg"><h3>ようこそ!まずはメンバー登録</h3><p class="muted small" style="margin:0 0 12px">名前と得意分野を入れるだけ。出欠・ランキングに参加できるようになります。</p><button class="btn primary block" data-act="register">メンバー登録する</button>${memberIds().filter(id=>!S.members[id].sample).length?`<button class="btn block" style="margin-top:8px" data-act="pickme">登録済みの人はこちら(自分を選ぶ)</button>`:""}</div>`;
+  }
+  if(next){
+    const ms=evStart(next)-now;
+    h+=`<article class="hero t-${next.type}" style="--tc:var(--${next.type==="grammar"?"cyan":next.type==="lesson"?"orange":"violet"})">
+      <div class="row" style="justify-content:space-between;align-items:center;position:relative"><span class="eyebrow">NEXT SESSION</span><span class="tag t-${next.type}">${TYPES[next.type]}</span></div>
+      <h3>${esc(next.type==="grammar"&&next.unit?UNIT_MAP[next.unit]?.[1]+(next.title&&next.title!==UNIT_MAP[next.unit]?.[1]?" — "+next.title:""):next.title)}</h3>
+      <div class="countdown" id="cd" data-start="${evStart(next).getTime()}" data-end="${evEnd(next).getTime()}">${cdHtml(ms, evEnd(next)-now)}</div>
+      <div class="meta">
+        <div><span class="k">日時</span><span>${md(next.date)} ${esc(timeRange(next))}</span></div>
+        ${next.place?`<div><span class="k">場所</span><span>${esc(next.place)}${next.map?` · <a href="${esc(next.map)}" target="_blank" rel="noopener">地図を開く</a>`:""}</span></div>`:""}
+        ${next.hostId?`<div><span class="k">担当</span><span>${esc(mname(next.hostId))}</span></div>`:""}
+        ${next.memo?`<div><span class="k">メモ</span><span>${esc(next.memo)}</span></div>`:""}
+      </div>
+      ${rsvpBlock(next)}
+      <div class="row" style="margin-top:14px;position:relative">
+        <button class="btn line" data-copy="${esc(next.id)}">${lineIcon()}LINE用にコピー</button>
+        <button class="btn" data-ev="${esc(next.id)}">詳細</button>
+      </div>
+    </article>`;
+  } else {
+    h+=`<div class="empty">次の予定はまだありません。<br>右下の「+」から勉強会を追加しよう。</div>`;
+  }
+  // me + streak
+  if(myId&&st[myId]){
+    const s=st[myId];
+    h+=`<div class="grid2">
+      <div class="card stat"><div class="flame">🔥${s.streak}</div><div><b>連続参加中</b><div class="nudge">次に参加すれば${s.streak+1}連続!</div></div></div>
+      <div class="card stat"><div class="flame" style="color:var(--lime-text)">${s.count}</div><div><b>通算参加回数</b><div class="small muted">今月 ${s.month}回</div></div></div>
+    </div>`;
+  }
+  // this week
+  const [a,b]=weekRange(); const wk=sortedEvents().filter(e=>e.date>=a&&e.date<=b);
+  h+=`<div class="sec-h"><h2>今週の予定</h2><button class="link" data-act="copyweek">まとめてLINEコピー</button></div>`;
+  h+= wk.length?`<div class="list">${wk.map(eventRow).join("")}</div>`:`<div class="empty">今週の予定はまだありません</div>`;
+  // mini ranking
+  const top=Object.keys(st).sort((x,y)=>st[y].count-st[x].count||st[y].streak-st[x].streak).slice(0,3);
+  if(top.length){
+    h+=`<div class="sec-h"><h2>参加ランキング</h2><button class="link" data-tab-go="rank">すべて見る</button></div><div class="list">${top.map((id,i)=>rankRow(id,i,st,"all")).join("")}</div>`;
+  }
+  // grammar mini
+  const done=UNITS.filter(u=>S.progress[u[0]]==="done").length, doing=UNITS.find(u=>S.progress[u[0]]==="doing");
+  h+=`<div class="sec-h"><h2>英文法の進み具合</h2><button class="link" data-tab-go="gram">単元を見る</button></div>
+  <div class="card"><div class="row" style="justify-content:space-between;align-items:baseline"><b>${done} / ${UNITS.length} 単元 完了</b><span class="small muted">${doing?`学習中:${doing[1]}`:""}</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.round(done/UNITS.length*100)}%"></i></div></div>`;
+  $("#v-home").innerHTML=h;
+}
+function cdHtml(ms, msEnd){
+  if(ms<=0) return msEnd>0?`<div class="cd" style="background:var(--lime);color:var(--ink)"><b>NOW</b><span style="color:inherit">開催中</span></div>`:"";
+  const d=Math.floor(ms/864e5), h=Math.floor(ms%864e5/36e5), m=Math.floor(ms%36e5/6e4);
+  return `<div class="cd"><b>${d}</b><span>日</span></div><div class="cd"><b>${pad(h)}</b><span>時間</span></div><div class="cd"><b>${pad(m)}</b><span>分</span></div>`;
+}
+const lineIcon=()=>`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8z"/></svg>`;
+
+/* ---------- render: calendar ---------- */
+function renderCal(){
+  const c=new Date(calCursor); const t=todayStr();
+  const byDate={}; for(const e of sortedEvents())(byDate[e.date]=byDate[e.date]||[]).push(e);
+  let title, body;
+  if(calMode==="month"){
+    title=`${c.getFullYear()}.${pad(c.getMonth()+1)}`;
+    const first=new Date(c.getFullYear(),c.getMonth(),1); const start=new Date(first); start.setDate(1-first.getDay());
+    const last=new Date(c.getFullYear(),c.getMonth()+1,0); const cells=Math.ceil((first.getDay()+last.getDate())/7)*7;
+    body=`<div class="month">${WD.map((w,i)=>`<div class="dow${i===0?" sun":i===6?" sat":""}">${w}</div>`).join("")}`;
+    for(let i=0;i<cells;i++){
+      const d=new Date(start); d.setDate(start.getDate()+i); const s=ymd(d); const evs=byDate[s]||[];
+      body+=`<button class="day${d.getMonth()!==c.getMonth()?" out":""}${s===t?" today":""}" data-day="${s}" aria-label="${d.getMonth()+1}月${d.getDate()}日 予定${evs.length}件"><span class="n">${d.getDate()}</span>${evs.slice(0,3).map(e=>`<span class="chip t-${e.type}">${esc(e.type==="grammar"&&e.unit?UNIT_MAP[e.unit]?.[1]:e.title)}</span>`).join("")}</button>`;
+    }
+    body+=`</div>`;
+  } else {
+    const mon=new Date(c); mon.setDate(c.getDate()-((c.getDay()+6)%7));
+    const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+    title=`${mon.getMonth()+1}/${mon.getDate()}–${sun.getMonth()+1}/${sun.getDate()}`;
+    body=`<div class="card" style="padding:4px 14px">`;
+    for(let i=0;i<7;i++){
+      const d=new Date(mon); d.setDate(mon.getDate()+i); const s=ymd(d); const evs=byDate[s]||[];
+      body+=`<div class="weekday${s===t?" today":""}"><div class="wd"><b>${d.getDate()}</b><span>${WD[d.getDay()]}曜</span></div><div class="items">${evs.map(eventRow).join("")}${evs.length?"":`<button class="add-day" data-new="${s}">+ この日に予定を追加</button>`}</div></div>`;
+    }
+    body+=`</div>`;
+  }
+  $("#v-cal").innerHTML=`
+    <div class="cal-head"><button class="icon-btn" data-cal="-1" aria-label="前へ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button><h2>${title}</h2><button class="btn" style="min-height:42px;padding:0 12px" data-cal="0">今日</button><button class="icon-btn" data-cal="1" aria-label="次へ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+    <div class="row" style="justify-content:space-between;align-items:center"><div class="seg" role="tablist"><button class="${calMode==="month"?"on":""}" data-calmode="month">月</button><button class="${calMode==="week"?"on":""}" data-calmode="week">週</button></div>
+    <div class="legend"><span class="t-grammar"><i></i>英文法</span><span class="t-lesson"><i></i>メンバー授業</span><span class="t-other"><i></i>その他</span></div></div>
+    ${body}`;
+}
+
+/* ---------- render: ranking ---------- */
+function rankRow(id,i,st,mode){
+  const s=st[id]; const n=mode==="month"?s.month:s.count; const medal=["🥇","🥈","🥉"][i];
+  return `<div class="rank${id===myId?" me":""}"><span class="pos">${medal||i+1}</span>${avatar(id)}<span class="who"><b>${esc(mname(id))}${id===myId?" (あなた)":""}</b><span class="streak">🔥 ${s.streak}連続</span>${s.streak>=1?` <span class="nudge">· 次で${s.streak+1}連続!</span>`:` <span class="small muted">· 次の参加でスタート</span>`}</span><span class="cnt">${n}<small>回</small></span></div>`;
+}
+function renderRank(){
+  const st=stats(); const ids=Object.keys(st).sort((x,y)=>(rankMode==="month"?st[y].month-st[x].month:st[y].count-st[x].count)||st[y].streak-st[x].streak);
+  let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="font-family:var(--display);font-size:20px;margin:0">参加ランキング</h2><div class="seg"><button class="${rankMode==="all"?"on":""}" data-rank="all">全期間</button><button class="${rankMode==="month"?"on":""}" data-rank="month">今月</button></div></div>`;
+  if(!ids.length){$("#v-rank").innerHTML=h+`<div class="empty">メンバーが登録されるとここに表示されます</div>`;return}
+  const v=id=>rankMode==="month"?st[id].month:st[id].count;
+  if(ids.length>=3){
+    const [a,b,c]=ids;
+    h+=`<div class="podium">${[[b,"🥈","p2"],[a,"🥇","p1"],[c,"🥉","p3"]].map(([id,m,p])=>`<div class="pod ${p}"><div class="medal">${m}</div>${avatar(id,"lg")}<b>${esc(mname(id))}</b><div class="cnt">${v(id)}<small class="muted" style="font-size:11px;font-family:var(--body)">回</small></div><div class="streak">🔥${st[id].streak}</div></div>`).join("")}</div>`;
+  }
+  h+=`<div class="list">${ids.map((id,i)=>rankRow(id,i,st,rankMode)).join("")}</div>`;
+  const best=[...ids].sort((x,y)=>st[y].streak-st[x].streak)[0];
+  h+=`<div class="sec-h"><h2>ストリーク王</h2></div><div class="card stat">${avatar(best,"lg")}<div style="flex:1;min-width:0"><b>${esc(mname(best))}</b><div class="small muted">いちばん長く連続参加中</div></div><div class="flame">🔥${st[best].streak}</div></div>`;
+  h+=`<div class="sec-h"><h2>バッジ</h2></div><div class="list">${ids.map(id=>`<div class="rank">${avatar(id)}<span class="who"><b>${esc(mname(id))}</b><div class="badges">${st[id].badges.length?st[id].badges.map(b=>`<span class="badge">${b}</span>`).join(""):`<span class="small muted">まだバッジはありません</span>`}</div></span></div>`).join("")}</div>
+  <p class="small muted" style="margin:0 2px">出席は、勉強会のあとに予定の詳細画面から誰か1人がチェックすれば記録されます。</p>`;
+  $("#v-rank").innerHTML=h;
+}
+
+/* ---------- render: grammar ---------- */
+function renderGram(){
+  const done=UNITS.filter(u=>S.progress[u[0]]==="done").length, doing=UNITS.filter(u=>S.progress[u[0]]==="doing").length;
+  const pct=Math.round(done/UNITS.length*100);
+  const evByUnit={}; for(const e of sortedEvents()) if(e.type==="grammar"&&e.unit)(evByUnit[e.unit]=evByUnit[e.unit]||[]).push(e);
+  let h=`<div class="card"><div class="row" style="align-items:flex-end;justify-content:space-between"><div><div class="eyebrow">GRAMMAR PROGRESS</div><div class="big-pct">${pct}<span style="font-size:20px">%</span></div></div><div class="small muted" style="text-align:right">完了 ${done} · 学習中 ${doing}<br>全 ${UNITS.length} 単元</div></div><div class="bar" style="margin-top:14px;height:12px"><i style="width:${pct}%"></i></div></div>
+  <p class="small muted" style="margin:0 2px">右のボタンをタップすると「未着手 → 学習中 → 完了」と切り替わります。</p>
+  <div class="list">`;
+  UNITS.forEach(([k,name,desc],i)=>{
+    const s=S.progress[k]||"todo"; const evs=evByUnit[k]||[];
+    h+=`<div class="unit ${s}"><span class="no">${pad(i+1)}</span><span class="nm"><b>${name}</b><span class="small muted">${desc}</span>${evs.length?`<div class="evs">${evs.map(e=>`<button data-ev="${esc(e.id)}">${md(e.date)}${e.title&&e.title!==name?" "+esc(e.title):""}</button>`).join("")}</div>`:""}</span><button class="st ${s}" data-unit="${k}" ${S.canWrite?"":"disabled"}>${{todo:"未着手",doing:"学習中",done:"完了 ✓"}[s]}</button></div>`;
+  });
+  $("#v-gram").innerHTML=h+`</div>`;
+}
+
+/* ---------- render: members ---------- */
+function renderMem(){
+  const st=stats(); const ids=memberIds();
+  let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="font-family:var(--display);font-size:20px;margin:0">メンバー <span class="muted" style="font-size:14px">${ids.length}人</span></h2>${myId&&S.members[myId]?`<button class="btn" style="min-height:42px" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" style="min-height:42px" data-act="register">メンバー登録</button>`}</div>`;
+  const notYet=ids.filter(id=>!st[id].taught.length);
+  if(notYet.length) h+=`<div class="card"><b>まだ授業を担当していない人</b><p class="small muted" style="margin:2px 0 10px">次のメンバー授業の担当決めの参考に。</p><div class="tbd">${notYet.map(id=>`<span>${avatar(id)}${esc(mname(id))}</span>`).join("")}</div></div>`;
+  if(!ids.length) h+=`<div class="empty">まだ誰も登録していません</div>`;
+  h+=`<div class="list">${ids.map(id=>{const m=S.members[id],s=st[id];return `<div class="mem">${avatar(id,"lg")}<div class="info"><b>${esc(m.name)}${id===myId?" <span class='small muted'>(あなた)</span>":""}</b><br>${m.skill?`<span class="skill">得意:${esc(m.skill)}</span>`:""}${m.bio?`<div class="small">${esc(m.bio)}</div>`:""}<div class="nums"><span><b>${s.count}</b>回参加</span><span><b>🔥${s.streak}</b>連続</span><span><b>${s.taught.length}</b>回授業</span></div>${s.taught.length?`<div class="badges">${s.taught.map(e=>`<button class="badge t-lesson" data-ev="${esc(e.id)}" style="border-color:var(--orange)">🎤 ${md(e.date)} ${esc(e.title)}</button>`).join("")}</div>`:""}${s.badges.length?`<div class="badges">${s.badges.map(b=>`<span class="badge">${b}</span>`).join("")}</div>`:""}</div></div>`}).join("")}</div>`;
+  $("#v-mem").innerHTML=h;
+}
+
+function renderHeader(){
+  $("#appName").textContent=S.appName||"英語勉強会(仮)";
+  $("#logo").textContent=[...(S.appName||"E")][0];
+  $("#meBtn").innerHTML = myId&&S.members[myId]?avatar(myId):`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`;
+  $("#fab").hidden=!S.canWrite;
+}
+function render(){
+  renderHeader();
+  ({home:renderHome,cal:renderCal,rank:renderRank,gram:renderGram,mem:renderMem})[tab]();
+  if(openSheet.refresh) openSheet.refresh();
+}
+function setTab(t){tab=t;document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));["home","cal","rank","gram","mem"].forEach(k=>$("#v-"+k).hidden=k!==t);render();window.scrollTo({top:0})}
+
+/* ---------- sheets ---------- */
+let scrim=null;
+function openSheet(html, refresh){
+  closeSheet(true);
+  scrim=document.createElement("div"); scrim.className="scrim";
+  scrim.innerHTML=`<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="stackv">${html}</div></div>`;
+  document.body.appendChild(scrim); requestAnimationFrame(()=>scrim&&scrim.classList.add("open"));
+  scrim.addEventListener("click",e=>{if(e.target===scrim||e.target.closest("[data-close]"))closeSheet()});
+  openSheet.refresh=refresh||null;
+  return scrim.querySelector(".stackv");
+}
+function closeSheet(instant){openSheet.refresh=null;if(!scrim)return;const s=scrim;scrim=null;if(instant)s.remove();else{s.classList.remove("open");setTimeout(()=>s.remove(),200)}}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
+
+function eventSheet(id){
+  const draw=()=>{
+    const e=S.events.find(x=>x.id===id); if(!e){closeSheet();return}
+    const box=scrim.querySelector(".stackv");
+    const isPast = e.date<=todayStr();
+    const att=new Set(e.attended||[]); const r=rsvpOf(e.id);
+    const title = e.type==="grammar"&&e.unit?UNIT_MAP[e.unit]?.[1]+(e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?" — "+e.title:""):e.title;
+    box.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><span class="tag t-${e.type}">${TYPES[e.type]}</span>${e.sample?`<span class="small muted">見本データ</span>`:""}</div>
+    <h3>${esc(title)}</h3>
+    <div class="meta">
+      <div><span class="k">日時</span><span>${md(e.date)} ${esc(timeRange(e))}</span></div>
+      ${e.place?`<div><span class="k">場所</span><span>${esc(e.place)}${e.map?`<br><a href="${esc(e.map)}" target="_blank" rel="noopener">Googleマップで開く</a>`:""}</span></div>`:""}
+      ${e.hostId?`<div><span class="k">担当</span><span>${esc(mname(e.hostId))}</span></div>`:""}
+      ${e.memo?`<div><span class="k">メモ</span><span style="white-space:pre-wrap">${esc(e.memo)}</span></div>`:""}
+      ${e.link?`<div><span class="k">資料</span><a href="${esc(e.link)}" target="_blank" rel="noopener">${esc(e.link)}</a></div>`:""}
+    </div>
+    ${!isPast||evEnd(e)>new Date()?rsvpBlock(e):""}
+    ${Object.keys(r).length?`<div class="rsvp-list muted">${["yes","maybe","no"].map(k=>{const p=Object.keys(r).filter(u=>r[u]===k&&S.members[u]);return p.length?`<div><b style="color:var(--fg)">${{yes:"参加",maybe:"未定",no:"不参加"}[k]}</b> ${p.map(u=>esc(mname(u))).join("、")}</div>`:""}).join("")}</div>`:""}
+    ${isPast?`<div class="divider"></div><div><b>出席チェック</b><p class="small muted" style="margin:2px 0 10px">実際に来た人をタップ。ランキングとストリークに反映されます。</p><div class="att">${memberIds().map(m=>`<button class="${att.has(m)?"on":""}" data-att="${esc(m)}" ${S.canWrite?"":"disabled"}>${avatar(m)}${esc(mname(m))}${att.has(m)?" ✓":""}</button>`).join("")||`<span class="small muted">メンバーがいません</span>`}</div></div>`:""}
+    <div class="divider"></div>
+    <button class="btn line block" data-copy="${esc(e.id)}">${lineIcon()}LINE用にコピー</button>
+    ${S.canWrite?`<div class="row"><button class="btn" data-edit="${esc(e.id)}">編集</button><button class="btn danger" id="delBtn">削除</button></div>`:""}`;
+    const del=box.querySelector("#delBtn");
+    if(del) del.onclick=async()=>{
+      if(del.dataset.armed){ try{await db.doc("events/"+id).delete(); for(const x of S.rsvps.filter(x=>x.eventId===id)) await db.doc("rsvps/"+x.id).delete(); closeSheet(); toast("予定を削除しました")}catch(err){toast("削除できませんでした")} }
+      else { del.dataset.armed="1"; del.textContent="本当に削除する"; del.classList.add("primary"); del.style.background="var(--danger)";del.style.color="#fff"; }
+    };
+  };
+  openSheet("",draw); draw();
+}
+
+function editSheet(id, presetDate){
+  const e = id?{...S.events.find(x=>x.id===id)}:{type:"grammar",date:presetDate||todayStr(),start:"18:00",end:"19:00",place:"",map:"",hostId:myId&&S.members[myId]?myId:"",unit:(UNITS.find(u=>S.progress[u[0]]!=="done")||UNITS[0])[0],title:"",memo:"",link:""};
+  const box=openSheet(`<h3>${id?"予定を編集":"予定を追加"}</h3>
+  <div class="field"><label>種類</label><div class="typepick">${Object.entries(TYPES).map(([k,l])=>`<button type="button" class="t-${k}${e.type===k?" on":""}" data-type="${k}">${l}</button>`).join("")}</div></div>
+  <div class="field" id="unitF"><label for="f-unit">文法の単元</label><select id="f-unit">${UNITS.map(u=>`<option value="${u[0]}"${e.unit===u[0]?" selected":""}>${u[1]}</option>`).join("")}</select></div>
+  <div class="field"><label for="f-title" id="titleL">タイトル</label><input id="f-title" value="${esc(e.title)}" placeholder=""></div>
+  <div class="three"><div class="field"><label for="f-date">日付</label><input type="date" id="f-date" value="${esc(e.date)}"></div><div class="field"><label for="f-start">開始</label><input type="time" id="f-start" value="${esc(e.start)}"></div><div class="field"><label for="f-end">終了</label><input type="time" id="f-end" value="${esc(e.end)}"></div></div>
+  <div class="field"><label for="f-place">場所</label><input id="f-place" value="${esc(e.place)}" placeholder="例:APU 図書館 グループ学習室"></div>
+  <div class="field"><label for="f-map">地図リンク(Googleマップ)</label><div class="inline"><input id="f-map" value="${esc(e.map)}" placeholder="https://..."><button type="button" class="btn" id="mkMap">場所から作る</button></div></div>
+  <div class="field"><label for="f-host">担当者</label><select id="f-host"><option value="">未定</option>${memberIds().map(m=>`<option value="${esc(m)}"${e.hostId===m?" selected":""}>${esc(mname(m))}</option>`).join("")}</select></div>
+  <div class="field"><label for="f-memo">内容メモ</label><textarea id="f-memo" placeholder="例:p.24〜31、例文を1人3つ作ってくる">${esc(e.memo)}</textarea></div>
+  <div class="field"><label for="f-link">資料リンク</label><input id="f-link" value="${esc(e.link)}" placeholder="https://..."></div>
+  <div class="row"><button class="btn" data-close>キャンセル</button><button class="btn primary" id="saveEv">保存する</button></div>`);
+  let type=e.type;
+  const sync=()=>{box.querySelectorAll("[data-type]").forEach(b=>b.classList.toggle("on",b.dataset.type===type));box.querySelector("#unitF").hidden=type!=="grammar";box.querySelector("#titleL").textContent=type==="grammar"?"サブタイトル(任意)":"タイトル";box.querySelector("#f-title").placeholder=type==="grammar"?"例:時制② 進行形":type==="lesson"?"例:プレゼンの組み立て方":"例:テスト前の振り返り会"};
+  sync();
+  box.querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>{type=b.dataset.type;sync()});
+  box.querySelector("#mkMap").onclick=()=>{const p=box.querySelector("#f-place").value.trim();if(!p){toast("先に場所を入力してください");return}box.querySelector("#f-map").value=mapUrl(p);toast("地図リンクを作りました")};
+  box.querySelector("#saveEv").onclick=async(ev)=>{
+    const v=k=>box.querySelector("#f-"+k).value.trim();
+    const data={type,date:v("date"),start:v("start"),end:v("end"),place:v("place"),map:v("map"),hostId:v("host"),unit:type==="grammar"?v("unit"):"",title:v("title"),memo:v("memo"),link:v("link"),attended:e.attended||[],sample:!!e.sample};
+    if(type!=="grammar"&&!data.title){toast("タイトルを入力してください");return}
+    if(type==="grammar"&&!data.title) data.title=UNIT_MAP[data.unit][1];
+    if(!data.date){toast("日付を入力してください");return}
+    ev.target.disabled=true;
+    try{
+      if(id) await db.doc("events/"+id).set(data);
+      else { data.createdBy=myId||""; await db.collection("events").doc().set(data); }
+      if(type==="grammar" && (S.progress[data.unit]||"todo")==="todo" && data.date<=todayStr()) await setUnit(data.unit,"doing");
+      closeSheet(); toast(id?"予定を更新しました":"予定を追加しました");
+    }catch(err){ev.target.disabled=false;toast(err?.code==="quota_exceeded"?"保存できる上限に達しました。古い予定を消してください":"保存できませんでした。もう一度試してください")}
+  };
+}
+
+function profileSheet(isNew){
+  const m=isNew?{name:"",bio:"",skill:""}:S.members[myId]||{};
+  const box=openSheet(`<h3>${isNew?"メンバー登録":"プロフィール編集"}</h3>
+  <div class="field"><label for="p-name">名前(みんなに表示されます)</label><input id="p-name" value="${esc(m.name)}" placeholder="例:しんたろう" maxlength="20"></div>
+  <div class="field"><label for="p-skill">得意分野・教えられること</label><input id="p-skill" value="${esc(m.skill)}" placeholder="例:プレゼン、統計、韓国語" maxlength="40"></div>
+  <div class="field"><label for="p-bio">ひとこと</label><input id="p-bio" value="${esc(m.bio)}" placeholder="例:毎回参加目指します!" maxlength="60"></div>
+  <div class="row"><button class="btn" data-close>キャンセル</button><button class="btn primary" id="saveP">${isNew?"登録する":"保存する"}</button></div>`);
+  box.querySelector("#saveP").onclick=async(ev)=>{
+    const name=box.querySelector("#p-name").value.trim(); if(!name){toast("名前を入力してください");return}
+    ev.target.disabled=true;
+    const id = isNew ? (uid && !S.members[uid] ? uid : newId()) : myId;
+    const data={name,skill:box.querySelector("#p-skill").value.trim(),bio:box.querySelector("#p-bio").value.trim(),joinedAt:m.joinedAt||Date.now(),sample:false};
+    try{ await db.doc("members/"+id).set(data); myId=id; ls.set("myId",id); closeSheet(); if(isNew){toast(`ようこそ、${name}さん!`);confetti()}else toast("保存しました"); render(); }
+    catch(err){ev.target.disabled=false;toast("保存できませんでした。もう一度試してください")}
+  };
+}
+function pickMeSheet(){
+  const ids=memberIds().filter(id=>!S.members[id].sample);
+  openSheet(`<h3>自分を選ぶ</h3><p class="small muted" style="margin:0">別のスマホやPCで登録済みなら、自分の名前を選んでください。この端末で覚えておきます。</p><div class="list">${ids.map(id=>`<button class="rank" data-pick="${esc(id)}" style="text-align:left">${avatar(id)}<span class="who"><b>${esc(mname(id))}</b><span class="small muted">${esc(S.members[id].skill||"")}</span></span></button>`).join("")}</div><button class="btn block" data-close>閉じる</button>`);
+}
+function settingsSheet(){
+  const theme=ls.get("theme")||"system"; const hasSample=S.events.some(e=>e.sample)||Object.values(S.members).some(m=>m.sample)||S.progressSample;
+  const box=openSheet(`<h3>設定</h3>
+  <div class="field"><label for="s-name">勉強会の名前</label><div class="inline"><input id="s-name" value="${esc(S.appName)}" placeholder="例:アウトプット部" maxlength="24" ${S.canWrite?"":"disabled"}><button class="btn primary" id="saveName" ${S.canWrite?"":"disabled"}>変更</button></div></div>
+  <div class="field"><label>表示テーマ</label><div class="seg" style="align-self:flex-start">${[["system","端末に合わせる"],["dark","ダーク"],["light","ライト"]].map(([k,l])=>`<button class="${theme===k?"on":""}" data-theme-set="${k}">${l}</button>`).join("")}</div></div>
+  <div class="divider"></div>
+  <div class="field"><label>あなた</label><div class="row">${myId&&S.members[myId]?`<button class="btn" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" data-act="register">メンバー登録</button>`}<button class="btn" data-act="pickme">別のメンバーに切り替え</button></div></div>
+  ${hasSample&&S.canWrite?`<div class="divider"></div><div class="field"><label>見本データ</label><p class="small muted" style="margin:0">最初から入っている「(見本)」のメンバー・予定・進捗をすべて消して、本番用にします。</p><button class="btn danger" id="clearSample">見本データを消す</button></div>`:""}
+  <button class="btn block" data-close>閉じる</button>`);
+  box.querySelector("#saveName").onclick=async()=>{const n=box.querySelector("#s-name").value.trim();try{await db.doc("settings/app").set({name:n});toast("名前を変更しました")}catch(e){toast("変更できませんでした")}};
+  const cs=box.querySelector("#clearSample");
+  if(cs) cs.onclick=async()=>{
+    if(!cs.dataset.armed){cs.dataset.armed="1";cs.textContent="本当に消す(元に戻せません)";cs.style.background="var(--danger)";cs.style.color="#fff";return}
+    cs.disabled=true; cs.textContent="消しています…";
+    try{
+      for(const e of S.events.filter(e=>e.sample)) await db.doc("events/"+e.id).delete();
+      for(const r of S.rsvps.filter(r=>r.sample)) await db.doc("rsvps/"+r.id).delete();
+      for(const [id,m] of Object.entries(S.members)) if(m.sample) await db.doc("members/"+id).delete();
+      for(const e of S.events.filter(e=>!e.sample&&(e.attended||[]).some(a=>a.startsWith("sample-")))) await db.doc("events/"+e.id).update({attended:e.attended.filter(a=>!a.startsWith("sample-"))});
+      if(S.progressSample) await db.doc("grammar/progress").set({statuses:{}});
+      closeSheet(); toast("見本データを消しました");
+    }catch(err){cs.disabled=false;cs.textContent="見本データを消す";toast("途中で失敗しました。もう一度押してください")}
+  };
+}
+function daySheet(s){
+  const draw=()=>{
+    const evs=sortedEvents().filter(e=>e.date===s);
+    scrim.querySelector(".stackv").innerHTML=`<h3>${md(s)}</h3>${evs.length?`<div class="list">${evs.map(eventRow).join("")}</div>`:`<div class="empty">この日の予定はありません</div>`}${S.canWrite?`<button class="btn primary block" data-new="${s}">+ この日に予定を追加</button>`:""}<button class="btn block" data-close>閉じる</button>`;
+  };
+  openSheet("",draw); draw();
+}
+
+/* ---------- writes ---------- */
+async function setRsvp(eid,status){
+  if(!myId||!S.members[myId]){toast("先にメンバー登録してください");profileSheet(true);return}
+  const docId=`${eid}__${myId}`; const cur=S.rsvps.find(r=>r.id===docId);
+  try{
+    if(cur&&cur.status===status) await db.doc("rsvps/"+docId).delete();
+    else await db.doc("rsvps/"+docId).set({eventId:eid,uid:myId,status,sample:false});
+  }catch(err){toast("送信できませんでした")}
+}
+const busy=new Set();
+async function toggleAtt(eid,mid){
+  const key="att:"+eid; if(busy.has(key))return; busy.add(key);
+  const e=S.events.find(x=>x.id===eid); const before=stats()[mid];
+  const set=new Set(e.attended||[]); set.has(mid)?set.delete(mid):set.add(mid);
+  try{
+    await db.doc("events/"+eid).update({attended:[...set]});
+    const after=stats()[mid];
+    if(after&&before&&(after.badges.length>before.badges.length||after.streak>before.streak)){
+      confetti(); toast(after.badges.length>before.badges.length?`${mname(mid)}さんが「${after.badges.at(-1)}」を獲得!`:`${mname(mid)}さん 🔥${after.streak}連続!`);
+    }
+  }catch(err){toast("記録できませんでした")}
+  busy.delete(key);
+}
+async function setUnit(k,status){
+  const statuses={...S.progress,[k]:status};
+  await db.doc("grammar/progress").set({statuses,sample:!!S.progressSample});
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",async ev=>{
+  const t=ev.target.closest("button,[data-ev]"); if(!t)return;
+  const d=t.dataset;
+  if(d.tab) return setTab(d.tab);
+  if(d.tabGo) return setTab(d.tabGo);
+  if(d.ev && !d.copy) return eventSheet(d.ev);
+  if(d.copy){const e=S.events.find(x=>x.id===d.copy); if(e) copy(lineText(e)); return}
+  if(d.rsvp) return setRsvp(d.eid,d.rsvp);
+  if(d.att){const sh=t.closest(".stackv");const eid=sh&&S.events.find(e=>sh.querySelector(`[data-copy="${CSS.escape(e.id)}"]`))?.id; if(eid) toggleAtt(eid,d.att); return}
+  if(d.edit) return editSheet(d.edit);
+  if(d.new) return editSheet(null,d.new);
+  if(d.day) return daySheet(d.day);
+  if(d.cal!==undefined){const n=Number(d.cal); if(n===0)calCursor=new Date(); else if(calMode==="month"){calCursor=new Date(calCursor.getFullYear(),calCursor.getMonth()+n,1)} else {calCursor=new Date(calCursor);calCursor.setDate(calCursor.getDate()+7*n)} return renderCal()}
+  if(d.calmode){calMode=d.calmode;ls.set("calMode",calMode);return renderCal()}
+  if(d.rank){rankMode=d.rank;return renderRank()}
+  if(d.unit){const cur=S.progress[d.unit]||"todo";const nx={todo:"doing",doing:"done",done:"todo"}[cur];t.disabled=true;try{await setUnit(d.unit,nx);if(nx==="done"){confetti();toast(`${UNIT_MAP[d.unit][1]} 完了!`)}}catch(e){toast("変更できませんでした")}t.disabled=false;return}
+  if(d.pick){myId=d.pick;ls.set("myId",myId);closeSheet();toast(`${mname(myId)}さんとして使います`);return render()}
+  if(d.themeSet){ls.set("theme",d.themeSet);applyTheme();t.parentElement.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===t));return}
+  if(d.act==="register") return profileSheet(true);
+  if(d.act==="profile") return profileSheet(false);
+  if(d.act==="pickme") return pickMeSheet();
+  if(d.act==="copyweek"){const w=weekText(); if(w) copy(w); else toast("今週の予定はまだありません"); return}
+});
+$("#fab").onclick=()=>editSheet(null, calMode&&tab==="cal"&&calMode==="month"?null:null);
+$("#setBtn").onclick=settingsSheet;
+$("#brandBtn").onclick=settingsSheet;
+$("#meBtn").onclick=()=>myId&&S.members[myId]?profileSheet(false):profileSheet(true);
+
+function applyTheme(){const t=ls.get("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme}
+
+/* ---------- countdown tick ---------- */
+setInterval(()=>{const c=$("#cd");if(!c)return;const now=Date.now();c.innerHTML=cdHtml(Number(c.dataset.start)-now,Number(c.dataset.end)-now)},20000);
+
+/* ---------- confetti ---------- */
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const cv=$("#fx"),ctx=cv.getContext("2d"),W=cv.width=innerWidth*devicePixelRatio,H=cv.height=innerHeight*devicePixelRatio;
+  const cols=["#C6F432","#22D3EE","#FF8A3D","#A78BFA","#F5C542"];
+  const P=Array.from({length:120},()=>({x:W/2,y:H*.45,vx:(Math.random()-.5)*22*devicePixelRatio,vy:(-Math.random()*20-6)*devicePixelRatio,s:(Math.random()*6+4)*devicePixelRatio,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[Math.random()*5|0]}));
+  let f=0;(function loop(){ctx.clearRect(0,0,W,H);for(const p of P){p.vy+=.7*devicePixelRatio;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);ctx.restore()}if(++f<110)requestAnimationFrame(loop);else ctx.clearRect(0,0,W,H)})();
+}
+
+/* ---------- boot ---------- */
+applyTheme();
+calMode=ls.get("calMode")==="week"?"week":"month";
+myId=ls.get("myId");
+render();
+
+function setStatus(html){$("#status").innerHTML=html}
+(()=>{
+  const cfg=window.FIREBASE_CONFIG;
+  if(typeof firebase==="undefined"||!cfg||!cfg.apiKey||/ここに/.test(cfg.apiKey)){
+    S.canWrite=false;
+    setStatus(`<div class="banner warn">まだデータベースにつながっていません。firebase-config.js にFirebaseの設定を貼り付けてください(手順はREADMEにあります)。</div>`);
+    render();return;
+  }
+  firebase.initializeApp(cfg);
+  db=firebase.firestore();
+  const timer=setTimeout(()=>{ if(!Object.keys(S.ready).length) setStatus(`<div class="banner warn">データにまだ接続できていません。通信状況を確認してください。</div>`) },10000);
+  const ok=k=>snap=>{ if(!snap.metadata.fromCache){S.ready[k]=1;clearTimeout(timer);setStatus("")} };
+  const fail=e=>{ clearTimeout(timer); setStatus(`<div class="banner warn">データを読み込めませんでした(${esc(e.code||"error")})。Firestoreのルール設定を確認してください。</div>`) };
+  db.collection("members").onSnapshot(s=>{S.members={};s.docs.forEach(d=>S.members[d.id]=d.data());ok("m")(s);render()},fail);
+  db.collection("events").onSnapshot(s=>{S.events=s.docs.map(d=>({id:d.id,...d.data()}));ok("e")(s);render()},fail);
+  db.collection("rsvps").onSnapshot(s=>{S.rsvps=s.docs.map(d=>({id:d.id,...d.data()}));ok("r")(s);render()},fail);
+  db.doc("grammar/progress").onSnapshot(s=>{const d=s.exists?s.data():{};S.progress=d.statuses||{};S.progressSample=!!d.sample;ok("g")(s);render()},fail);
+  db.doc("settings/app").onSnapshot(s=>{S.appName=s.exists?(s.data().name||""):"";ok("s")(s);render()},fail);
+})();
+})();
+</script>
+</body>
+</html>
