@@ -16,6 +16,7 @@ const APP_URL = 'https://shintaroyade.github.io/study-board/';
 const DEFAULT_NAME = '英語勉強会';
 const DEFAULT_INVITE = 'OUTPUT2026';
 const ADMIN_UID = 'L8IGhzLvCqVWjKxoLXQgDYsc8lH3';
+const SENDER = 'output.apu2026@gmail.com';   // このスクリプトを動かしているアカウント(お試し送信の宛先)
 const REMIND_HOUR = 20;               // 前日リマインドを送る時刻(時)
 const DIGEST_DOW = 7, DIGEST_HOUR = 19; // 週まとめ:日曜(7) の 19時
 const BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/';
@@ -234,7 +235,7 @@ function sendDigest(today, c, testTo) {
 
 /* ---------------- お試し送信(このアカウント自身にだけ届く) ---------------- */
 function testReminder() {
-  const c = loadCtx(); const me = Session.getEffectiveUser().getEmail(); const today = nowJst().date;
+  const c = loadCtx(); const me = SENDER; const today = nowJst().date;
   let day = addDays(today, 1);
   if (!Object.keys(c.events).some(function (k) { return c.events[k].date === day; })) {
     const up = Object.keys(c.events).map(function (k) { return c.events[k].date; }).filter(function (d) { return d > today; }).sort();
@@ -245,7 +246,7 @@ function testReminder() {
   Logger.log(n ? me + ' にリマインドの見本(' + md(day) + 'の予定)を送りました。' : '見本を作れませんでした(その日の予定がすべて不参加など)。');
 }
 function testDigest() {
-  const c = loadCtx(); const me = Session.getEffectiveUser().getEmail();
+  const c = loadCtx(); const me = SENDER;
   const n = sendDigest(nowJst().date, c, me);
   Logger.log(n ? me + ' に週まとめの見本を送りました。' : '来週の予定もアウトプットもないため、週まとめは送られない状態です。');
 }
