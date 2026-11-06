@@ -1,19 +1,19 @@
 rules_version = '2';
-// 勉強会アプリ用のルール。
-// URLを知っている人は誰でも読み書きできます(ログイン不要)。
-// アプリが使う5つの場所以外への書き込みは禁止しています。
+// 勉強会アプリ用ルール
+// ・予定と勉強会の名前:誰でも見られる(書き込みはログインした人だけ)
+// ・メンバー/出欠/文法の進捗:ログインした人だけ
+// ・目標メモ・理解度(users/本人のID/...):本人しか読み書きできない
 service cloud.firestore {
   match /databases/{database}/documents {
-    function small() {
-      // 削除はOK。書き込みは項目数20個まで(いたずらで巨大なデータを入れられないように)
-      return request.resource == null || request.resource.data.size() <= 20;
-    }
+    function signedIn() { return request.auth != null; }
+    function small() { return request.resource == null || request.resource.data.size() <= 20; }
 
-    match /members/{id}  { allow read: if true; allow write: if small(); }
-    match /events/{id}   { allow read: if true; allow write: if small(); }
-    match /rsvps/{id}    { allow read: if true; allow write: if small(); }
-    match /grammar/{id}  { allow read: if true; allow write: if id == "progress"; }
-    match /settings/{id} { allow read: if true; allow write: if id == "app"; }
+    match /events/{id}   { allow read: if true;       allow write: if signedIn() && small(); }
+    match /settings/{id} { allow read: if true;       allow write: if signedIn() && id == "app"; }
+    match /members/{uid} { allow read: if signedIn(); allow write: if signedIn() && request.auth.uid == uid && small(); }
+    match /rsvps/{id}    { allow read: if signedIn(); allow write: if signedIn() && small() && (request.resource == null || request.resource.data.uid == request.auth.uid); }
+    match /grammar/{id}  { allow read: if signedIn(); allow write: if signedIn() && id == "progress"; }
+    match /users/{uid}/{document=**} { allow read, write: if signedIn() && request.auth.uid == uid; }
 
     match /{document=**} { allow read, write: if false; }
   }

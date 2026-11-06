@@ -243,6 +243,25 @@ canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;heigh
 .empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:14px;border:1px dashed var(--line);border-radius:16px}
 .reg{border:1px solid var(--lime);background:color-mix(in srgb,var(--lime) 8%,var(--surface))}
 .reg h3{font-family:var(--display);font-size:18px;margin:0 0 4px}
+.greet h2{font-family:var(--display);font-size:24px;margin:2px 0 0;text-wrap:balance}
+.greet p{margin:4px 0 0}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mini-stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center;min-width:0}
+.card .mini-stat{background:var(--surface2)}
+.mini-stat b{display:block;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums;line-height:1.25;white-space:nowrap}
+.mini-stat span{font-size:11px;color:var(--muted)}
+.lock{font-size:12px;color:var(--muted);font-weight:700}
+.self{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--muted);font-weight:700}
+.self button{width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);font-size:15px;font-weight:700;color:var(--muted)}
+.self button.on[data-v="◎"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.self button.on[data-v="○"]{background:var(--cyan);border-color:var(--cyan);color:var(--ink)}
+.self button.on[data-v="△"]{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.link-btn{background:none;border:0;color:var(--lime-text);font-weight:700;font-size:13px;padding:8px 0;align-self:center}
+.qa{display:flex;flex-direction:column;gap:6px}
+.rsvp.mini{margin-top:0}
+.rsvp.mini button{min-height:40px;font-size:13px}
+.ulist{display:flex;gap:6px;flex-wrap:wrap}
+.memo-card{display:flex;flex-direction:column;gap:14px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -294,6 +313,7 @@ canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;heigh
 </body>
 </html>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </body>
 </html>
 <script src="firebase-config.js?v=2"></script>
@@ -316,8 +336,9 @@ const WD = ["日","月","火","水","木","金","土"];
 const AV_COLORS = ["#C6F432","#22D3EE","#FF8A3D","#A78BFA","#F5C542","#5EEAD4","#F472B6","#93C5FD"];
 
 /* ---------- state ---------- */
-const S = {members:{}, events:[], rsvps:[], progress:{}, appName:"", ready:{}, canWrite:true};
-let db=null, uid=null, myId=null;
+const S = {members:{}, events:[], rsvps:[], progress:{}, appName:"", ready:{}, canWrite:false, auth:null, authReady:false, priv:{}};
+let draft=null;
+let db=null, auth=null, myId=null, unsubs=[];
 let tab="home", calMode="month", calCursor=new Date(), rankMode="all";
 const $ = s=>document.querySelector(s);
 const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -338,6 +359,7 @@ const mapUrl = place=>"https://www.google.com/maps/search/?api=1&query="+encodeU
 function hashColor(id){let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return AV_COLORS[h%AV_COLORS.length]}
 function avatar(id,cls=""){const m=S.members[id];const n=m?.name||"?";return `<span class="av ${cls}" style="background:${hashColor(id)}" aria-hidden="true">${esc([...n.replace(/[(（].*$/,"").trim()||n][0]||"?")}</span>`}
 const mname = id=>S.members[id]?.name||"(未登録)";
+const hostOf = e=>e.hostId&&S.members[e.hostId]?S.members[e.hostId].name:"";
 const sortedEvents = ()=>[...S.events].sort((a,b)=>(a.date+(a.start||"")).localeCompare(b.date+(b.start||"")));
 const memberIds = ()=>Object.keys(S.members).sort((a,b)=>(S.members[a].joinedAt||0)-(S.members[b].joinedAt||0));
 function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("on"),2200)}
@@ -373,7 +395,7 @@ function lineText(e){
   if(e.place) L.push(`📍 ${e.place}${e.map?`\n${e.map}`:""}`);
   const content = e.type==="grammar"&&e.unit ? `${UNIT_MAP[e.unit]?.[1]||""}${e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?`(${e.title})`:""}` : e.title;
   L.push(`📖 ${TYPES[e.type]||""}:${content}`);
-  if(e.hostId) L.push(`🙋 担当:${mname(e.hostId)}`);
+  if(hostOf(e)) L.push(`🙋 担当:${hostOf(e)}`);
   if(e.memo) L.push(`📝 ${e.memo}`);
   if(e.link) L.push(`📎 ${e.link}`);
   L.push("参加できる人は返信してね!");
@@ -386,7 +408,7 @@ function weekText(){
   const head=`【今週の${S.appName||"勉強会"}】${md(a)}〜${md(b)}`;
   return [head,...evs.map(e=>{
     const c = e.type==="grammar"&&e.unit?UNIT_MAP[e.unit]?.[1]:e.title;
-    return `\n▶ ${md(e.date)} ${timeRange(e)}\n  ${TYPES[e.type]}:${c}${e.hostId?` / 担当 ${mname(e.hostId)}`:""}${e.place?`\n  📍 ${e.place}`:""}${e.map?`\n  ${e.map}`:""}`;
+    return `\n▶ ${md(e.date)} ${timeRange(e)}\n  ${TYPES[e.type]}:${c}${hostOf(e)?` / 担当 ${hostOf(e)}`:""}${e.place?`\n  📍 ${e.place}`:""}${e.map?`\n  ${e.map}`:""}`;
   }),"\n参加できる人は返信してね!"].join("\n");
 }
 async function copy(text){
@@ -400,7 +422,7 @@ async function copy(text){
 /* ---------- render: home ---------- */
 function eventRow(e){
   const d=pd(e.date); const past = evEnd(e)<new Date();
-  const sub=[timeRange(e), e.place, e.hostId?`担当 ${mname(e.hostId)}`:""].filter(Boolean).join(" · ");
+  const sub=[timeRange(e), e.place, hostOf(e)?`担当 ${hostOf(e)}`:""].filter(Boolean).join(" · ");
   const title = e.type==="grammar"&&e.unit ? `${UNIT_MAP[e.unit]?.[1]}${e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?" — "+e.title:""}` : e.title;
   return `<button class="ev t-${e.type}${past?" past":""}" data-ev="${esc(e.id)}"><span class="date"><b>${d.getDate()}</b><span>${d.getMonth()+1}月 ${WD[d.getDay()]}</span></span><span class="body"><span class="title">${esc(title||"(タイトルなし)")}</span><span class="sub">${esc(sub)}</span></span><span class="tag t-${e.type}" style="flex:none">${TYPES[e.type]}</span></button>`;
 }
@@ -414,58 +436,74 @@ function rsvpBlock(e){
   </div>
   <div class="goers">${yes.length?`<span class="stack">${yes.slice(0,7).map(id=>avatar(id)).join("")}</span><span>参加予定 <b style="color:var(--fg)">${yes.length}人</b>${maybe.length?` · 未定 ${maybe.length}人`:""}</span>`:`<span>まだ参加表明はありません${maybe.length?` · 未定 ${maybe.length}人`:""}</span>`}</div>`;
 }
-function renderHome(){
-  const st=stats(); const now=new Date();
-  const upcoming=sortedEvents().filter(e=>evEnd(e)>=now);
-  const next=upcoming[0];
-  let h="";
-  if(!myId || !S.members[myId]){
-    h+=`<div class="card reg"><h3>ようこそ!まずはメンバー登録</h3><p class="muted small" style="margin:0 0 12px">名前と得意分野を入れるだけ。出欠・ランキングに参加できるようになります。</p><button class="btn primary block" data-act="register">メンバー登録する</button>${memberIds().filter(id=>!S.members[id].sample).length?`<button class="btn block" style="margin-top:8px" data-act="pickme">登録済みの人はこちら(自分を選ぶ)</button>`:""}</div>`;
-  }
-  if(next){
-    const ms=evStart(next)-now;
-    h+=`<article class="hero t-${next.type}" style="--tc:var(--${next.type==="grammar"?"cyan":next.type==="lesson"?"orange":"violet"})">
-      <div class="row" style="justify-content:space-between;align-items:center;position:relative"><span class="eyebrow">NEXT SESSION</span><span class="tag t-${next.type}">${TYPES[next.type]}</span></div>
-      <h3>${esc(next.type==="grammar"&&next.unit?UNIT_MAP[next.unit]?.[1]+(next.title&&next.title!==UNIT_MAP[next.unit]?.[1]?" — "+next.title:""):next.title)}</h3>
-      <div class="countdown" id="cd" data-start="${evStart(next).getTime()}" data-end="${evEnd(next).getTime()}">${cdHtml(ms, evEnd(next)-now)}</div>
-      <div class="meta">
-        <div><span class="k">日時</span><span>${md(next.date)} ${esc(timeRange(next))}</span></div>
-        ${next.place?`<div><span class="k">場所</span><span>${esc(next.place)}${next.map?` · <a href="${esc(next.map)}" target="_blank" rel="noopener">地図を開く</a>`:""}</span></div>`:""}
-        ${next.hostId?`<div><span class="k">担当</span><span>${esc(mname(next.hostId))}</span></div>`:""}
-        ${next.memo?`<div><span class="k">メモ</span><span>${esc(next.memo)}</span></div>`:""}
-      </div>
-      ${rsvpBlock(next)}
-      <div class="row" style="margin-top:14px;position:relative">
-        <button class="btn line" data-copy="${esc(next.id)}">${lineIcon()}LINE用にコピー</button>
-        <button class="btn" data-ev="${esc(next.id)}">詳細</button>
-      </div>
-    </article>`;
-  } else {
-    h+=`<div class="empty">次の予定はまだありません。<br>右下の「+」から勉強会を追加しよう。</div>`;
-  }
-  // me + streak
-  if(myId&&st[myId]){
-    const s=st[myId];
-    h+=`<div class="grid2">
-      <div class="card stat"><div class="flame">🔥${s.streak}</div><div><b>連続参加中</b><div class="nudge">次に参加すれば${s.streak+1}連続!</div></div></div>
-      <div class="card stat"><div class="flame" style="color:var(--lime-text)">${s.count}</div><div><b>通算参加回数</b><div class="small muted">今月 ${s.month}回</div></div></div>
-    </div>`;
-  }
-  // this week
-  const [a,b]=weekRange(); const wk=sortedEvents().filter(e=>e.date>=a&&e.date<=b);
-  h+=`<div class="sec-h"><h2>今週の予定</h2><button class="link" data-act="copyweek">まとめてLINEコピー</button></div>`;
-  h+= wk.length?`<div class="list">${wk.map(eventRow).join("")}</div>`:`<div class="empty">今週の予定はまだありません</div>`;
-  // mini ranking
-  const top=Object.keys(st).sort((x,y)=>st[y].count-st[x].count||st[y].streak-st[x].streak).slice(0,3);
-  if(top.length){
-    h+=`<div class="sec-h"><h2>参加ランキング</h2><button class="link" data-tab-go="rank">すべて見る</button></div><div class="list">${top.map((id,i)=>rankRow(id,i,st,"all")).join("")}</div>`;
-  }
-  // grammar mini
-  const done=UNITS.filter(u=>S.progress[u[0]]==="done").length, doing=UNITS.find(u=>S.progress[u[0]]==="doing");
-  h+=`<div class="sec-h"><h2>英文法の進み具合</h2><button class="link" data-tab-go="gram">単元を見る</button></div>
-  <div class="card"><div class="row" style="justify-content:space-between;align-items:baseline"><b>${done} / ${UNITS.length} 単元 完了</b><span class="small muted">${doing?`学習中:${doing[1]}`:""}</span></div><div class="bar" style="margin-top:10px"><i style="width:${Math.round(done/UNITS.length*100)}%"></i></div></div>`;
-  $("#v-home").innerHTML=h;
+function heroHtml(next, live){
+  const now=new Date(); const ms=evStart(next)-now;
+  const c=next.type==="grammar"?"cyan":next.type==="lesson"?"orange":"violet";
+  const ttl=next.type==="grammar"&&next.unit?UNIT_MAP[next.unit]?.[1]+(next.title&&next.title!==UNIT_MAP[next.unit]?.[1]?" — "+next.title:""):next.title;
+  return `<article class="hero t-${next.type}" style="--tc:var(--${c})">
+    <div class="row" style="justify-content:space-between;align-items:center;position:relative"><span class="eyebrow">NEXT SESSION</span><span class="tag t-${next.type}">${TYPES[next.type]}</span></div>
+    <h3>${esc(ttl)}</h3>
+    <div class="countdown" id="cd" data-start="${evStart(next).getTime()}" data-end="${evEnd(next).getTime()}">${cdHtml(ms, evEnd(next)-now)}</div>
+    <div class="meta">
+      <div><span class="k">日時</span><span>${md(next.date)} ${esc(timeRange(next))}</span></div>
+      ${next.place?`<div><span class="k">場所</span><span>${esc(next.place)}${next.map?` · <a href="${esc(next.map)}" target="_blank" rel="noopener">地図を開く</a>`:""}</span></div>`:""}
+      ${hostOf(next)?`<div><span class="k">担当</span><span>${esc(hostOf(next))}</span></div>`:""}
+      ${next.memo?`<div><span class="k">メモ</span><span>${esc(next.memo)}</span></div>`:""}
+    </div>
+    ${live?rsvpBlock(next):`<p class="small muted" style="margin:14px 0 0;position:relative">出欠の返事はログインすると押せます。</p>`}
+    <div class="row" style="margin-top:14px;position:relative">
+      <button class="btn line" data-copy="${esc(next.id)}">${lineIcon()}LINE用にコピー</button>
+      <button class="btn" data-ev="${esc(next.id)}">詳細</button>
+    </div>
+  </article>`;
 }
+function myRsvps(){const r={};for(const x of S.rsvps)if(x.uid===myId)r[x.eventId]=x.status;return r}
+const GREET=["今日も一歩ずつ。","続けた人が一番伸びる。","アウトプットしたぶんだけ身につく。","小さな積み重ねが大きな差になる。"];
+function renderHome(){
+  const now=new Date();
+  const upcoming=sortedEvents().filter(e=>evEnd(e)>=now); const next=upcoming[0];
+  const [a,b]=weekRange(); const wk=sortedEvents().filter(e=>e.date>=a&&e.date<=b);
+  const weekHtml=`<div class="sec-h"><h2>今週の予定</h2><button class="link" data-act="copyweek">まとめてLINEコピー</button></div>`+(wk.length?`<div class="list">${wk.map(eventRow).join("")}</div>`:`<div class="empty">今週の予定はまだありません</div>`);
+  if(!S.auth){
+    const later=upcoming.filter(e=>e.date>b).slice(0,5);
+    $("#v-home").innerHTML=(S.authReady?`<div class="card reg"><h3>ログインして参加しよう</h3><p class="muted small" style="margin:0 0 12px">予定はログインなしで見られます。ログインすると、出欠の返事と、自分だけのホーム(参加記録・目標メモ・文法の理解度)が使えます。</p><div class="row"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div></div>`:"")
+      +(next?heroHtml(next,false):`<div class="empty">次の予定はまだありません</div>`)+weekHtml
+      +(later.length?`<div class="sec-h"><h2>これからの予定</h2><button class="link" data-tab-go="cal">カレンダーで見る</button></div><div class="list">${later.map(eventRow).join("")}</div>`:"");
+    return;
+  }
+  const st=stats(); const me=S.members[myId];
+  const s=st[myId]||{count:0,month:0,streak:0,badges:[],taught:[],taughtDone:[]};
+  const mine=myRsvps();
+  const unanswered=upcoming.filter(e=>!mine[e.id]);
+  const going=upcoming.filter(e=>mine[e.id]==="yes");
+  const ranked=Object.keys(st).sort((x,y)=>st[y].count-st[x].count||st[y].streak-st[x].streak);
+  const pos=ranked.indexOf(myId)+1;
+  const und=S.priv.understanding||{};
+  const cnt={"◎":0,"○":0,"△":0}; for(const k in und) if(cnt[und[k]]!==undefined) cnt[und[k]]++;
+  const weak=UNITS.filter(u=>und[u[0]]==="△");
+  const goal=draft?draft.goal:(S.priv.goal||""), memo=draft?draft.memo:(S.priv.memo||"");
+  let h=`<div class="greet"><div class="eyebrow">MY HOME</div><h2>${me?esc(me.name)+" さん":"ようこそ"}</h2><p class="small muted">${GREET[new Date().getDate()%GREET.length]}</p></div>`;
+  if(!me) h+=`<div class="card reg"><h3>プロフィールを登録しよう</h3><p class="muted small" style="margin:0 0 12px">名前と得意分野を登録すると、出欠やランキングに参加できます。</p><button class="btn primary block" data-act="register">プロフィールを登録する</button></div>`;
+  h+=next?heroHtml(next,true):`<div class="empty">次の予定はまだありません。<br>右下の「+」から勉強会を追加しよう。</div>`;
+  h+=`<div class="grid3"><div class="mini-stat"><b style="color:var(--orange)">🔥${s.streak}</b><span>連続参加</span></div><div class="mini-stat"><b style="color:var(--lime-text)">${s.count}</b><span>通算 · 今月${s.month}</span></div><div class="mini-stat"><b>${pos&&s.count?pos+"位":"—"}</b><span>参加ランキング</span></div></div>`;
+  h+=`<div class="card"><div class="nudge">${s.streak?`次に参加すれば${s.streak+1}連続!`:"次の参加でストリークがスタート!"}</div><div class="badges">${s.badges.length?s.badges.map(x=>`<span class="badge">${x}</span>`).join(""):`<span class="small muted">参加するとバッジがもらえます</span>`}</div></div>`;
+  if(unanswered.length){
+    h+=`<div class="sec-h"><h2>返事がまだの予定 <span class="muted" style="font-size:13px">${unanswered.length}件</span></h2></div><div class="list">${unanswered.slice(0,5).map(e=>`<div class="qa">${eventRow(e)}<div class="rsvp mini" role="group" aria-label="出欠">${[["yes","参加"],["maybe","未定"],["no","不参加"]].map(([k,l])=>`<button class="${k}" data-rsvp="${k}" data-eid="${esc(e.id)}">${l}</button>`).join("")}</div></div>`).join("")}</div>`;
+  }
+  h+=`<div class="sec-h"><h2>参加予定</h2></div>`+(going.length?`<div class="list">${going.slice(0,6).map(eventRow).join("")}</div>`:`<div class="empty">参加予定の勉強会はまだありません</div>`);
+  h+=`<div class="sec-h"><h2>目標とメモ</h2><span class="lock">🔒 自分だけに表示</span></div>
+  <div class="card memo-card"><div class="field"><label for="my-goal">今の目標</label><textarea id="my-goal" maxlength="500" placeholder="例:12月までに関係詞まで終わらせる">${esc(goal)}</textarea></div>
+  <div class="field"><label for="my-memo">メモ・振り返り</label><textarea id="my-memo" maxlength="3000" placeholder="例:現在完了と過去形の違いがまだあいまい">${esc(memo)}</textarea></div>
+  <div class="row" style="justify-content:space-between;align-items:center"><span class="small muted" id="memoState">${draft?"未保存の変更があります":S.priv.updatedAt?"保存済み":""}</span><button class="btn primary" id="saveMemo" style="flex:none">保存する</button></div></div>`;
+  h+=`<div class="sec-h"><h2>文法の理解度</h2><button class="link" data-tab-go="gram">単元ごとに評価する</button></div>
+  <div class="card"><div class="grid3" style="margin-bottom:12px"><div class="mini-stat"><b style="color:var(--lime-text)">${cnt["◎"]}</b><span>◎ ばっちり</span></div><div class="mini-stat"><b style="color:var(--cyan)">${cnt["○"]}</b><span>○ だいたい</span></div><div class="mini-stat"><b style="color:var(--orange)">${cnt["△"]}</b><span>△ 苦手</span></div></div>
+  ${weak.length?`<div class="small"><b>復習したい単元</b></div><div class="ulist" style="margin-top:6px">${weak.map(u=>`<span class="badge">${u[1]}</span>`).join("")}</div>`:`<div class="small muted">${Object.keys(und).length?"苦手な単元はありません。いい調子!":"文法タブで、各単元を ◎ ○ △ で自己評価できます(自分だけに表示)。"}</div>`}</div>`;
+  h+=weekHtml;
+  const fa=document.activeElement; const fid=fa&&(fa.id==="my-goal"||fa.id==="my-memo")?fa.id:null; const sel=fid?[fa.selectionStart,fa.selectionEnd]:null;
+  $("#v-home").innerHTML=h;
+  if(fid){const el=$("#"+fid); if(el){el.focus(); try{el.setSelectionRange(sel[0],sel[1])}catch(e){}}}
+}
+function lockHtml(title,desc){return `<div class="card reg" style="text-align:center;padding:28px 18px"><div style="font-size:30px" aria-hidden="true">🔒</div><h3>${title}はメンバー限定です</h3><p class="muted small" style="margin:4px 0 14px">${desc}</p><div class="row" style="justify-content:center"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div></div>`}
 function cdHtml(ms, msEnd){
   if(ms<=0) return msEnd>0?`<div class="cd" style="background:var(--lime);color:var(--ink)"><b>NOW</b><span style="color:inherit">開催中</span></div>`:"";
   const d=Math.floor(ms/864e5), h=Math.floor(ms%864e5/36e5), m=Math.floor(ms%36e5/6e4);
@@ -512,6 +550,7 @@ function rankRow(id,i,st,mode){
   return `<div class="rank${id===myId?" me":""}"><span class="pos">${medal||i+1}</span>${avatar(id)}<span class="who"><b>${esc(mname(id))}${id===myId?" (あなた)":""}</b><span class="streak">🔥 ${s.streak}連続</span>${s.streak>=1?` <span class="nudge">· 次で${s.streak+1}連続!</span>`:` <span class="small muted">· 次の参加でスタート</span>`}</span><span class="cnt">${n}<small>回</small></span></div>`;
 }
 function renderRank(){
+  if(!S.auth){$("#v-rank").innerHTML=lockHtml("参加ランキング","ログインすると、参加回数ランキング・🔥ストリーク・バッジが見られます。");return}
   const st=stats(); const ids=Object.keys(st).sort((x,y)=>(rankMode==="month"?st[y].month-st[x].month:st[y].count-st[x].count)||st[y].streak-st[x].streak);
   let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="font-family:var(--display);font-size:20px;margin:0">参加ランキング</h2><div class="seg"><button class="${rankMode==="all"?"on":""}" data-rank="all">全期間</button><button class="${rankMode==="month"?"on":""}" data-rank="month">今月</button></div></div>`;
   if(!ids.length){$("#v-rank").innerHTML=h+`<div class="empty">メンバーが登録されるとここに表示されます</div>`;return}
@@ -530,21 +569,26 @@ function renderRank(){
 
 /* ---------- render: grammar ---------- */
 function renderGram(){
+  if(!S.auth){$("#v-gram").innerHTML=lockHtml("文法の進み具合","ログインすると、全体の進捗と、自分だけの理解度メモ(◎○△)が使えます。");return}
   const done=UNITS.filter(u=>S.progress[u[0]]==="done").length, doing=UNITS.filter(u=>S.progress[u[0]]==="doing").length;
   const pct=Math.round(done/UNITS.length*100);
+  const und=S.priv.understanding||{};
+  const cnt={"◎":0,"○":0,"△":0}; for(const k in und) if(cnt[und[k]]!==undefined) cnt[und[k]]++;
   const evByUnit={}; for(const e of sortedEvents()) if(e.type==="grammar"&&e.unit)(evByUnit[e.unit]=evByUnit[e.unit]||[]).push(e);
-  let h=`<div class="card"><div class="row" style="align-items:flex-end;justify-content:space-between"><div><div class="eyebrow">GRAMMAR PROGRESS</div><div class="big-pct">${pct}<span style="font-size:20px">%</span></div></div><div class="small muted" style="text-align:right">完了 ${done} · 学習中 ${doing}<br>全 ${UNITS.length} 単元</div></div><div class="bar" style="margin-top:14px;height:12px"><i style="width:${pct}%"></i></div></div>
-  <p class="small muted" style="margin:0 2px">右のボタンをタップすると「未着手 → 学習中 → 完了」と切り替わります。</p>
+  let h=`<div class="card"><div class="row" style="align-items:flex-end;justify-content:space-between"><div><div class="eyebrow">GRAMMAR PROGRESS</div><div class="big-pct">${pct}<span style="font-size:20px">%</span></div></div><div class="small muted" style="text-align:right">完了 ${done} · 学習中 ${doing}<br>全 ${UNITS.length} 単元</div></div><div class="bar" style="margin-top:14px;height:12px"><i style="width:${pct}%"></i></div>
+  <div class="row small" style="margin-top:12px;justify-content:space-between;align-items:center"><span>自分の理解度 ◎${cnt["◎"]} · ○${cnt["○"]} · △${cnt["△"]}</span><span class="lock">🔒 自分だけに表示</span></div></div>
+  <p class="small muted" style="margin:0 2px">右のボタンはみんなの進み具合(未着手 → 学習中 → 完了)。「自分」の ◎ ○ △ はあなただけに見える理解度です。</p>
   <div class="list">`;
   UNITS.forEach(([k,name,desc],i)=>{
     const s=S.progress[k]||"todo"; const evs=evByUnit[k]||[];
-    h+=`<div class="unit ${s}"><span class="no">${pad(i+1)}</span><span class="nm"><b>${name}</b><span class="small muted">${desc}</span>${evs.length?`<div class="evs">${evs.map(e=>`<button data-ev="${esc(e.id)}">${md(e.date)}${e.title&&e.title!==name?" "+esc(e.title):""}</button>`).join("")}</div>`:""}</span><button class="st ${s}" data-unit="${k}" ${S.canWrite?"":"disabled"}>${{todo:"未着手",doing:"学習中",done:"完了 ✓"}[s]}</button></div>`;
+    h+=`<div class="unit ${s}"><span class="no">${pad(i+1)}</span><span class="nm"><b>${name}</b><span class="small muted">${desc}</span>${evs.length?`<div class="evs">${evs.map(e=>`<button data-ev="${esc(e.id)}">${md(e.date)}${e.title&&e.title!==name?" "+esc(e.title):""}</button>`).join("")}</div>`:""}<div class="self" role="group" aria-label="${name}の自分の理解度"><span>自分</span>${["◎","○","△"].map(m=>`<button class="${und[k]===m?"on":""}" data-self="${k}" data-v="${m}" aria-pressed="${und[k]===m}">${m}</button>`).join("")}</div></span><button class="st ${s}" data-unit="${k}" ${S.canWrite?"":"disabled"}>${{todo:"未着手",doing:"学習中",done:"完了 ✓"}[s]}</button></div>`;
   });
   $("#v-gram").innerHTML=h+`</div>`;
 }
 
 /* ---------- render: members ---------- */
 function renderMem(){
+  if(!S.auth){$("#v-mem").innerHTML=lockHtml("メンバー一覧","ログインすると、メンバーの得意分野や授業の担当履歴が見られます。");return}
   const st=stats(); const ids=memberIds();
   let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="font-family:var(--display);font-size:20px;margin:0">メンバー <span class="muted" style="font-size:14px">${ids.length}人</span></h2>${myId&&S.members[myId]?`<button class="btn" style="min-height:42px" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" style="min-height:42px" data-act="register">メンバー登録</button>`}</div>`;
   const notYet=ids.filter(id=>!st[id].taught.length);
@@ -559,6 +603,8 @@ function renderHeader(){
   $("#logo").textContent=[...(S.appName||"E")][0];
   $("#meBtn").innerHTML = myId&&S.members[myId]?avatar(myId):`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`;
   $("#fab").hidden=!S.canWrite;
+  const hb=document.querySelector('nav.tabs [data-tab="home"]'); if(hb) hb.lastChild.textContent=S.auth?"マイホーム":"ホーム";
+  $("#meBtn").setAttribute("aria-label",S.auth?"アカウント":"ログイン");
 }
 function render(){
   renderHeader();
@@ -593,13 +639,13 @@ function eventSheet(id){
     <div class="meta">
       <div><span class="k">日時</span><span>${md(e.date)} ${esc(timeRange(e))}</span></div>
       ${e.place?`<div><span class="k">場所</span><span>${esc(e.place)}${e.map?`<br><a href="${esc(e.map)}" target="_blank" rel="noopener">Googleマップで開く</a>`:""}</span></div>`:""}
-      ${e.hostId?`<div><span class="k">担当</span><span>${esc(mname(e.hostId))}</span></div>`:""}
+      ${hostOf(e)?`<div><span class="k">担当</span><span>${esc(hostOf(e))}</span></div>`:""}
       ${e.memo?`<div><span class="k">メモ</span><span style="white-space:pre-wrap">${esc(e.memo)}</span></div>`:""}
       ${e.link?`<div><span class="k">資料</span><a href="${esc(e.link)}" target="_blank" rel="noopener">${esc(e.link)}</a></div>`:""}
     </div>
-    ${!isPast||evEnd(e)>new Date()?rsvpBlock(e):""}
-    ${Object.keys(r).length?`<div class="rsvp-list muted">${["yes","maybe","no"].map(k=>{const p=Object.keys(r).filter(u=>r[u]===k&&S.members[u]);return p.length?`<div><b style="color:var(--fg)">${{yes:"参加",maybe:"未定",no:"不参加"}[k]}</b> ${p.map(u=>esc(mname(u))).join("、")}</div>`:""}).join("")}</div>`:""}
-    ${isPast?`<div class="divider"></div><div><b>出席チェック</b><p class="small muted" style="margin:2px 0 10px">実際に来た人をタップ。ランキングとストリークに反映されます。</p><div class="att">${memberIds().map(m=>`<button class="${att.has(m)?"on":""}" data-att="${esc(m)}" ${S.canWrite?"":"disabled"}>${avatar(m)}${esc(mname(m))}${att.has(m)?" ✓":""}</button>`).join("")||`<span class="small muted">メンバーがいません</span>`}</div></div>`:""}
+    ${S.auth?(!isPast||evEnd(e)>new Date()?rsvpBlock(e):""):`<p class="small muted" style="margin:0">出欠の返事はログインすると押せます。</p>`}
+    ${S.auth&&Object.keys(r).length?`<div class="rsvp-list muted">${["yes","maybe","no"].map(k=>{const p=Object.keys(r).filter(u=>r[u]===k&&S.members[u]);return p.length?`<div><b style="color:var(--fg)">${{yes:"参加",maybe:"未定",no:"不参加"}[k]}</b> ${p.map(u=>esc(mname(u))).join("、")}</div>`:""}).join("")}</div>`:""}
+    ${isPast&&S.auth?`<div class="divider"></div><div><b>出席チェック</b><p class="small muted" style="margin:2px 0 10px">実際に来た人をタップ。ランキングとストリークに反映されます。</p><div class="att">${memberIds().map(m=>`<button class="${att.has(m)?"on":""}" data-att="${esc(m)}" ${S.canWrite?"":"disabled"}>${avatar(m)}${esc(mname(m))}${att.has(m)?" ✓":""}</button>`).join("")||`<span class="small muted">メンバーがいません</span>`}</div></div>`:""}
     <div class="divider"></div>
     <button class="btn line block" data-copy="${esc(e.id)}">${lineIcon()}LINE用にコピー</button>
     ${S.canWrite?`<div class="row"><button class="btn" data-edit="${esc(e.id)}">編集</button><button class="btn danger" id="delBtn">削除</button></div>`:""}`;
@@ -656,15 +702,57 @@ function profileSheet(isNew){
   box.querySelector("#saveP").onclick=async(ev)=>{
     const name=box.querySelector("#p-name").value.trim(); if(!name){toast("名前を入力してください");return}
     ev.target.disabled=true;
-    const id = isNew ? (uid && !S.members[uid] ? uid : newId()) : myId;
-    const data={name,skill:box.querySelector("#p-skill").value.trim(),bio:box.querySelector("#p-bio").value.trim(),joinedAt:m.joinedAt||Date.now(),sample:false};
-    try{ await db.doc("members/"+id).set(data); myId=id; ls.set("myId",id); closeSheet(); if(isNew){toast(`ようこそ、${name}さん!`);confetti()}else toast("保存しました"); render(); }
+    const id = myId; if(!id){ev.target.disabled=false;closeSheet();authSheet("login");return}
+    const data={name,skill:box.querySelector("#p-skill").value.trim(),bio:box.querySelector("#p-bio").value.trim(),joinedAt:m.joinedAt||Date.now()};
+    try{ await db.doc("members/"+id).set(data); closeSheet(); if(isNew){toast(`ようこそ、${name}さん!`);confetti()}else toast("保存しました"); render(); }
     catch(err){ev.target.disabled=false;toast("保存できませんでした。もう一度試してください")}
   };
 }
-function pickMeSheet(){
-  const ids=memberIds().filter(id=>!S.members[id].sample);
-  openSheet(`<h3>自分を選ぶ</h3><p class="small muted" style="margin:0">別のスマホやPCで登録済みなら、自分の名前を選んでください。この端末で覚えておきます。</p><div class="list">${ids.map(id=>`<button class="rank" data-pick="${esc(id)}" style="text-align:left">${avatar(id)}<span class="who"><b>${esc(mname(id))}</b><span class="small muted">${esc(S.members[id].skill||"")}</span></span></button>`).join("")}</div><button class="btn block" data-close>閉じる</button>`);
+function authErr(e){
+  return ({"auth/invalid-email":"メールアドレスの形式が正しくありません","auth/missing-email":"メールアドレスを入力してください","auth/missing-password":"パスワードを入力してください","auth/weak-password":"パスワードは6文字以上にしてください","auth/email-already-in-use":"このメールアドレスはもう登録されています。「ログイン」から入ってください","auth/invalid-credential":"メールアドレスかパスワードが違います","auth/invalid-login-credentials":"メールアドレスかパスワードが違います","auth/wrong-password":"メールアドレスかパスワードが違います","auth/user-not-found":"メールアドレスかパスワードが違います","auth/too-many-requests":"試した回数が多すぎます。少し時間をおいてからもう一度試してください","auth/network-request-failed":"通信できませんでした。電波の状態を確認してください","auth/operation-not-allowed":"ログイン機能がまだ有効になっていません。管理者に連絡してください"})[e&&e.code]||`うまくいきませんでした(${esc(e&&e.code||"error")})`;
+}
+function authSheet(mode="login", email=""){
+  const su=mode==="signup";
+  const box=openSheet(`<div class="seg" style="align-self:flex-start" role="tablist"><button class="${su?"":"on"}" data-auth-mode="login">ログイン</button><button class="${su?"on":""}" data-auth-mode="signup">新規登録</button></div>
+  <h3>${su?"アカウントを作る":"おかえりなさい"}</h3>
+  ${su?`<p class="small muted" style="margin:0">メールアドレスとパスワードを決めて登録します。名前はみんなに表示されます。</p>
+  <div class="field"><label for="a-name">名前</label><input id="a-name" maxlength="20" placeholder="例:しんたろう" autocomplete="nickname"></div>
+  <div class="field"><label for="a-skill">得意分野・教えられること</label><input id="a-skill" maxlength="40" placeholder="例:プレゼン、統計、韓国語"></div>`:""}
+  <div class="field"><label for="a-email">メールアドレス</label><input id="a-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${esc(email)}"></div>
+  <div class="field"><label for="a-pass">パスワード${su?"(6文字以上)":""}</label><input id="a-pass" type="password" autocomplete="${su?"new-password":"current-password"}"></div>
+  <p class="small" id="a-msg" style="margin:0;color:var(--danger)" role="alert"></p>
+  <button class="btn primary block" id="a-go">${su?"登録してはじめる":"ログイン"}</button>
+  ${su?"":`<button class="link-btn" id="a-reset">パスワードを忘れた場合</button>`}
+  <button class="btn block" data-close>閉じる</button>`);
+  const v=id=>(box.querySelector("#"+id)?.value||"").trim();
+  const msg=(t,ok)=>{const m=box.querySelector("#a-msg");m.textContent=t;m.style.color=ok?"var(--lime-text)":"var(--danger)"};
+  box.querySelectorAll("[data-auth-mode]").forEach(b=>b.onclick=()=>{ if(b.dataset.authMode!==mode) authSheet(b.dataset.authMode, v("a-email")); });
+  box.querySelector("#a-pass").addEventListener("keydown",e=>{if(e.key==="Enter")box.querySelector("#a-go").click()});
+  box.querySelector("#a-go").onclick=async(ev)=>{
+    const em=v("a-email"), pw=box.querySelector("#a-pass").value;
+    if(su&&!v("a-name")){msg("名前を入力してください");return}
+    if(!em){msg("メールアドレスを入力してください");return}
+    if(!pw){msg("パスワードを入力してください");return}
+    ev.target.disabled=true; msg("");
+    try{
+      if(su){
+        const cred=await auth.createUserWithEmailAndPassword(em,pw);
+        await db.doc("members/"+cred.user.uid).set({name:v("a-name"),skill:v("a-skill"),bio:"",joinedAt:Date.now()});
+        closeSheet(); toast(`ようこそ、${v("a-name")}さん!`); confetti();
+      } else {
+        await auth.signInWithEmailAndPassword(em,pw);
+        closeSheet(); toast("ログインしました");
+      }
+      setTab("home");
+    }catch(e){ ev.target.disabled=false; msg(authErr(e)); }
+  };
+  const rs=box.querySelector("#a-reset");
+  if(rs) rs.onclick=async()=>{
+    const em=v("a-email"); if(!em){msg("先にメールアドレスを入力してください");return}
+    try{ await auth.sendPasswordResetEmail(em); msg("パスワード再設定用のメールを送りました。届かない場合は迷惑メールフォルダも確認してください。",true); }
+    catch(e){ msg(authErr(e)); }
+  };
+  setTimeout(()=>box.querySelector(su?"#a-name":(email?"#a-pass":"#a-email"))?.focus(),250);
 }
 function settingsSheet(){
   const theme=ls.get("theme")||"system"; const hasSample=S.events.some(e=>e.sample)||Object.values(S.members).some(m=>m.sample)||S.progressSample;
@@ -672,7 +760,7 @@ function settingsSheet(){
   <div class="field"><label for="s-name">勉強会の名前</label><div class="inline"><input id="s-name" value="${esc(S.appName)}" placeholder="例:アウトプット部" maxlength="24" ${S.canWrite?"":"disabled"}><button class="btn primary" id="saveName" ${S.canWrite?"":"disabled"}>変更</button></div></div>
   <div class="field"><label>表示テーマ</label><div class="seg" style="align-self:flex-start">${[["system","端末に合わせる"],["dark","ダーク"],["light","ライト"]].map(([k,l])=>`<button class="${theme===k?"on":""}" data-theme-set="${k}">${l}</button>`).join("")}</div></div>
   <div class="divider"></div>
-  <div class="field"><label>あなた</label><div class="row">${myId&&S.members[myId]?`<button class="btn" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" data-act="register">メンバー登録</button>`}<button class="btn" data-act="pickme">別のメンバーに切り替え</button></div></div>
+  <div class="field"><label>アカウント</label>${S.auth?`<div class="small muted" style="word-break:break-all">${esc(S.auth.email||"")} でログイン中</div><div class="row">${S.members[myId]?`<button class="btn" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" data-act="register">プロフィール登録</button>`}<button class="btn danger" data-act="logout">ログアウト</button></div>`:`<div class="row"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div>`}</div>
   ${hasSample&&S.canWrite?`<div class="divider"></div><div class="field"><label>見本データ</label><p class="small muted" style="margin:0">最初から入っている「(見本)」のメンバー・予定・進捗をすべて消して、本番用にします。</p><button class="btn danger" id="clearSample">見本データを消す</button></div>`:""}
   <button class="btn block" data-close>閉じる</button>`);
   box.querySelector("#saveName").onclick=async()=>{const n=box.querySelector("#s-name").value.trim();try{await db.doc("settings/app").set({name:n});toast("名前を変更しました")}catch(e){toast("変更できませんでした")}};
@@ -700,7 +788,8 @@ function daySheet(s){
 
 /* ---------- writes ---------- */
 async function setRsvp(eid,status){
-  if(!myId||!S.members[myId]){toast("先にメンバー登録してください");profileSheet(true);return}
+  if(!S.auth){authSheet("login");return}
+  if(!S.members[myId]){toast("先にプロフィールを登録してください");profileSheet(true);return}
   const docId=`${eid}__${myId}`; const cur=S.rsvps.find(r=>r.id===docId);
   try{
     if(cur&&cur.status===status) await db.doc("rsvps/"+docId).delete();
@@ -743,17 +832,32 @@ document.addEventListener("click",async ev=>{
   if(d.calmode){calMode=d.calmode;ls.set("calMode",calMode);return renderCal()}
   if(d.rank){rankMode=d.rank;return renderRank()}
   if(d.unit){const cur=S.progress[d.unit]||"todo";const nx={todo:"doing",doing:"done",done:"todo"}[cur];t.disabled=true;try{await setUnit(d.unit,nx);if(nx==="done"){confetti();toast(`${UNIT_MAP[d.unit][1]} 完了!`)}}catch(e){toast("変更できませんでした")}t.disabled=false;return}
-  if(d.pick){myId=d.pick;ls.set("myId",myId);closeSheet();toast(`${mname(myId)}さんとして使います`);return render()}
+  if(t.id==="saveMemo"){
+    const goal=$("#my-goal").value, memo=$("#my-memo").value; t.disabled=true;
+    try{ await db.doc("users/"+myId+"/private/notes").set({goal,memo,updatedAt:Date.now()},{merge:true}); draft=null; toast("目標とメモを保存しました"); }
+    catch(e){ toast("保存できませんでした。もう一度試してください"); }
+    t.disabled=false; return render();
+  }
+  if(d.self){
+    if(!S.auth) return authSheet("login");
+    const cur=(S.priv.understanding||{})[d.self]; const val=cur===d.v?firebase.firestore.FieldValue.delete():d.v;
+    try{ await db.doc("users/"+myId+"/private/notes").set({understanding:{[d.self]:val}},{merge:true}); }
+    catch(e){ toast("保存できませんでした"); }
+    return;
+  }
   if(d.themeSet){ls.set("theme",d.themeSet);applyTheme();t.parentElement.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===t));return}
-  if(d.act==="register") return profileSheet(true);
+  if(d.act==="register") return S.auth?profileSheet(true):authSheet("signup");
   if(d.act==="profile") return profileSheet(false);
-  if(d.act==="pickme") return pickMeSheet();
+  if(d.act==="login") return authSheet("login");
+  if(d.act==="signup") return authSheet("signup");
+  if(d.act==="logout"){ closeSheet(); try{ await auth.signOut(); toast("ログアウトしました"); }catch(e){ toast("ログアウトできませんでした"); } return setTab("home"); }
   if(d.act==="copyweek"){const w=weekText(); if(w) copy(w); else toast("今週の予定はまだありません"); return}
 });
 $("#fab").onclick=()=>editSheet(null, calMode&&tab==="cal"&&calMode==="month"?null:null);
 $("#setBtn").onclick=settingsSheet;
 $("#brandBtn").onclick=settingsSheet;
-$("#meBtn").onclick=()=>myId&&S.members[myId]?profileSheet(false):profileSheet(true);
+$("#meBtn").onclick=()=>S.auth?settingsSheet():authSheet("login");
+document.addEventListener("input",e=>{ if(e.target.id==="my-goal"||e.target.id==="my-memo"){ draft={goal:$("#my-goal").value,memo:$("#my-memo").value}; const st=$("#memoState"); if(st) st.textContent="未保存の変更があります"; } });
 
 function applyTheme(){const t=ls.get("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme}
 
@@ -772,7 +876,6 @@ function confetti(){
 /* ---------- boot ---------- */
 applyTheme();
 calMode=ls.get("calMode")==="week"?"week":"month";
-myId=ls.get("myId");
 render();
 
 function setStatus(html){$("#status").innerHTML=html}
@@ -784,15 +887,23 @@ function setStatus(html){$("#status").innerHTML=html}
     render();return;
   }
   firebase.initializeApp(cfg);
-  db=firebase.firestore();
-  const timer=setTimeout(()=>{ if(!Object.keys(S.ready).length) setStatus(`<div class="banner warn">データにまだ接続できていません。通信状況を確認してください。</div>`) },10000);
-  const ok=k=>snap=>{ if(!snap.metadata.fromCache){S.ready[k]=1;clearTimeout(timer);setStatus("")} };
-  const fail=e=>{ clearTimeout(timer); setStatus(`<div class="banner warn">データを読み込めませんでした(${esc(e.code||"error")})。Firestoreのルール設定を確認してください。</div>`) };
-  db.collection("members").onSnapshot(s=>{S.members={};s.docs.forEach(d=>S.members[d.id]=d.data());ok("m")(s);render()},fail);
-  db.collection("events").onSnapshot(s=>{S.events=s.docs.map(d=>({id:d.id,...d.data()}));ok("e")(s);render()},fail);
-  db.collection("rsvps").onSnapshot(s=>{S.rsvps=s.docs.map(d=>({id:d.id,...d.data()}));ok("r")(s);render()},fail);
-  db.doc("grammar/progress").onSnapshot(s=>{const d=s.exists?s.data():{};S.progress=d.statuses||{};S.progressSample=!!d.sample;ok("g")(s);render()},fail);
-  db.doc("settings/app").onSnapshot(s=>{S.appName=s.exists?(s.data().name||""):"";ok("s")(s);render()},fail);
+  db=firebase.firestore(); auth=firebase.auth(); auth.languageCode="ja";
+  const timer=setTimeout(()=>{ if(!S.ready.e) setStatus(`<div class="banner warn">データにまだ接続できていません。通信状況を確認してください。</div>`) },10000);
+  const fail=e=>{ if(e&&e.code==="permission-denied"&&!auth.currentUser) return; clearTimeout(timer); setStatus(`<div class="banner warn">データを読み込めませんでした(${esc(e&&e.code||"error")})。ページを再読み込みしてください。</div>`) };
+  db.collection("events").onSnapshot(s=>{S.events=s.docs.map(d=>({id:d.id,...d.data()})); if(!s.metadata.fromCache){S.ready.e=1;clearTimeout(timer);setStatus("")} render()},fail);
+  db.doc("settings/app").onSnapshot(s=>{S.appName=s.exists?(s.data().name||""):"";render()},fail);
+  auth.onAuthStateChanged(u=>{
+    unsubs.forEach(f=>f()); unsubs=[];
+    S.auth=u; myId=u?u.uid:null; S.canWrite=!!u; S.authReady=true;
+    S.members={}; S.rsvps=[]; S.progress={}; S.priv={}; draft=null;
+    if(u){
+      unsubs.push(db.collection("members").onSnapshot(s=>{S.members={};s.docs.forEach(d=>S.members[d.id]=d.data());render()},fail));
+      unsubs.push(db.collection("rsvps").onSnapshot(s=>{S.rsvps=s.docs.map(d=>({id:d.id,...d.data()}));render()},fail));
+      unsubs.push(db.doc("grammar/progress").onSnapshot(s=>{const d=s.exists?s.data():{};S.progress=d.statuses||{};S.progressSample=!!d.sample;render()},fail));
+      unsubs.push(db.doc("users/"+u.uid+"/private/notes").onSnapshot(s=>{S.priv=s.exists?s.data():{};render()},fail));
+    }
+    render();
+  });
 })();
 })();
 </script>
