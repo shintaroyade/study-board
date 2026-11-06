@@ -119,7 +119,8 @@ main{padding-block:16px 120px}
 .ev .date{flex:none;width:52px;text-align:center;border-radius:10px;padding:6px 0;background:color-mix(in srgb,var(--tc) 16%,transparent)}
 .ev .date b{display:block;font-family:var(--display);font-size:18px;line-height:1.1;color:var(--tc)}
 .ev .date span{font-size:11px;color:var(--muted)}
-.ev .body{flex:1;min-width:0}
+.ev .body{flex:1;min-width:0;overflow:hidden}
+.ev .title,.ev .sub{display:block}
 .ev .title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ev .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ev.past{opacity:.7}
@@ -266,6 +267,48 @@ canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;heigh
 .rsvp.mini button{min-height:40px;font-size:13px}
 .ulist{display:flex;gap:6px;flex-wrap:wrap}
 .memo-card{display:flex;flex-direction:column;gap:14px}
+a.btn{text-decoration:none;color:inherit}
+nav.tabs .in{grid-template-columns:repeat(6,1fr)!important}
+nav.tabs button{font-size:10.5px}
+.booked{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding-top:4px}
+.booked .check svg{width:66px;height:66px}
+.booked .check circle{fill:none;stroke:var(--lime-text);stroke-width:3;stroke-dasharray:151;stroke-dashoffset:151;animation:dash .6s ease forwards}
+.booked .check path{fill:none;stroke:var(--lime-text);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:dash .4s ease .45s forwards}
+@keyframes dash{to{stroke-dashoffset:0}}
+.cal-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cal-btns .btn{padding:0 10px;font-size:13px}
+.checkin{font-size:16px;min-height:54px}
+.checked{text-align:center;font-weight:700;color:var(--lime-text);padding:10px;border:1px dashed var(--lime-text);border-radius:14px}
+.refl{display:flex;flex-direction:column;gap:12px}
+.fb-box{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;background:var(--surface2);border:1px solid var(--line)}
+.fb-box .field textarea{background:var(--surface)}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+.chk input{width:20px;height:20px;accent-color:var(--lime)}
+.fb{padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:14px;display:flex;flex-direction:column;gap:4px;text-align:left}
+.fb-who{font-size:12px;font-weight:700;color:var(--muted)}
+.fb-k{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;margin-right:6px}
+.fb-k.good{background:color-mix(in srgb,var(--lime) 22%,transparent);color:var(--lime-text)}
+.fb-k.more{background:color-mix(in srgb,var(--cyan) 20%,transparent);color:var(--cyan)}
+.fbwrap{background:none;border:0;padding:0;text-align:left;display:flex;flex-direction:column;gap:4px;width:100%}
+.outs{display:flex;flex-direction:column;gap:8px}
+.out{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--line)}
+.out-b{min-width:0;flex:1}
+.out-b p{margin:2px 0 0;word-break:break-word}
+.out-ev{font-size:11px;color:var(--muted)}
+.vh{font-family:var(--display);font-size:20px;margin:0}
+.theme{display:flex;gap:12px;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);align-items:flex-start}
+.vote{flex:none;width:56px;min-height:62px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.vote b{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.vote.on{background:color-mix(in srgb,var(--lime) 20%,var(--surface2));border-color:var(--lime-text)}
+.th-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.th-t{font-size:16px;word-break:break-word}
+.th-b p{margin:0;word-break:break-word}
+.teach{font-size:13px;font-weight:700;color:var(--orange)}
+.th-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.mini-btn{min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);font-size:12px;font-weight:700}
+.mini-btn.hot{background:var(--orange);border-color:var(--orange);color:#1a0d00}
+.mini-btn.warn{border-color:var(--danger);color:var(--danger)}
+@media (prefers-reduced-motion: reduce){.booked .check circle,.booked .check path{stroke-dashoffset:0}}
 /* ---- splash (loading) : always the dark brand look ---- */
 #splash{position:fixed;inset:0;z-index:100;background:#0B1222;display:grid;place-items:center;transition:opacity .5s ease,visibility .5s}
 #splash.out{opacity:0;visibility:hidden}
@@ -339,6 +382,7 @@ canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;heigh
   <section class="view" id="v-rank" hidden></section>
   <section class="view" id="v-gram" hidden></section>
   <section class="view" id="v-mem" hidden></section>
+  <section class="view" id="v-theme" hidden></section>
 </main>
 
 <button class="fab" id="fab" aria-label="予定を追加">
@@ -349,6 +393,7 @@ canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;heigh
   <div class="in">
     <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>ホーム</button>
     <button data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>カレンダー</button>
+    <button data-tab="theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>テーマ</button>
     <button data-tab="rank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>ランキング</button>
     <button data-tab="gram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 21.5"/><path d="M8 7h7M8 11h5"/></svg>文法</button>
     <button data-tab="mem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.2a5 5 0 0 1 5.5 4.8"/></svg>メンバー</button>
@@ -382,10 +427,13 @@ const UNITS = [
 const UNIT_MAP = Object.fromEntries(UNITS.map(u=>[u[0],u]));
 const TYPES = {grammar:"英文法",lesson:"メンバー授業",other:"その他"};
 const WD = ["日","月","火","水","木","金","土"];
+const ADMIN_UIDS = ["L8IGhzLvCqVWjKxoLXQgDYsc8lH3"];
+const APP_URL = location.origin + location.pathname;
 const AV_COLORS = ["#C6F432","#22D3EE","#FF8A3D","#A78BFA","#F5C542","#5EEAD4","#F472B6","#93C5FD"];
 
 /* ---------- state ---------- */
-const S = {members:{}, events:[], rsvps:[], progress:{}, appName:"", ready:{}, canWrite:false, auth:null, authReady:false, priv:{}};
+const S = {members:{}, events:[], rsvps:[], progress:{}, appName:"", ready:{}, canWrite:false, auth:null, authReady:false, priv:{}, isMember:false, memberChecked:false, outputs:[], fbIn:[], fbMine:[], themes:[], invite:null, contact:{}};
+let themeFilter="open";
 let draft=null;
 let db=null, auth=null, myId=null, unsubs=[];
 let tab="home", calMode="month", calCursor=new Date(), rankMode="all";
@@ -433,7 +481,10 @@ function stats(){
     if(streak>=3)badges.push("🔥 3連続");
     if(streak>=5)badges.push("💥 5連続");
     if(taughtDone.length>=1)badges.push("🎤 授業デビュー");
-    out[id]={count, month:att.filter(e=>e.date.startsWith(month)).length, streak, taught, taughtDone, badges};
+    const outs=S.outputs.filter(o=>o.uid===id&&o.learned).length;
+    if(outs>=1)badges.push("✍️ 初アウトプット");
+    if(outs>=10)badges.push("📚 アウトプット10回");
+    out[id]={count, month:att.filter(e=>e.date.startsWith(month)).length, streak, taught, taughtDone, badges, outs};
   }
   return out;
 }
@@ -499,7 +550,7 @@ function heroHtml(next, live){
       ${hostOf(next)?`<div><span class="k">担当</span><span>${esc(hostOf(next))}</span></div>`:""}
       ${next.memo?`<div><span class="k">メモ</span><span>${esc(next.memo)}</span></div>`:""}
     </div>
-    ${live?rsvpBlock(next):`<p class="small muted" style="margin:14px 0 0;position:relative">出欠の返事はログインすると押せます。</p>`}
+    ${live?checkinHtml(next)+rsvpBlock(next):`<p class="small muted" style="margin:14px 0 0;position:relative">出欠の返事はログインすると押せます。</p>`}
     <div class="row" style="margin-top:14px;position:relative">
       <button class="btn line" data-copy="${esc(next.id)}">${lineIcon()}LINE用にコピー</button>
       <button class="btn" data-ev="${esc(next.id)}">詳細</button>
@@ -513,9 +564,9 @@ function renderHome(){
   const upcoming=sortedEvents().filter(e=>evEnd(e)>=now); const next=upcoming[0];
   const [a,b]=weekRange(); const wk=sortedEvents().filter(e=>e.date>=a&&e.date<=b);
   const weekHtml=`<div class="sec-h"><h2>今週の予定</h2><button class="link" data-act="copyweek">まとめてLINEコピー</button></div>`+(wk.length?`<div class="list">${wk.map(eventRow).join("")}</div>`:`<div class="empty">今週の予定はまだありません</div>`);
-  if(!S.auth){
+  if(!S.isMember){
     const later=upcoming.filter(e=>e.date>b).slice(0,5);
-    $("#v-home").innerHTML=(S.authReady?`<div class="card reg"><h3>ログインして参加しよう</h3><p class="muted small" style="margin:0 0 12px">予定はログインなしで見られます。ログインすると、出欠の返事と、自分だけのホーム(参加記録・目標メモ・文法の理解度)が使えます。</p><div class="row"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div></div>`:"")
+    $("#v-home").innerHTML=(S.authReady&&S.auth&&S.memberChecked?`<div class="card reg"><h3>メンバー登録を完了しよう</h3><p class="muted small" style="margin:0 0 12px">招待コードと名前を入れると、出欠の返事や自分だけのホームが使えるようになります。招待コードは森山さんに聞いてください。</p><button class="btn primary block" data-act="register">招待コードを入力する</button></div>`:"")+(S.authReady&&!S.auth?`<div class="card reg"><h3>ログインして参加しよう</h3><p class="muted small" style="margin:0 0 12px">予定はログインなしで見られます。ログインすると、出欠の返事と、自分だけのホーム(参加記録・目標メモ・文法の理解度)が使えます。</p><div class="row"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div></div>`:"")
       +(next?heroHtml(next,false):`<div class="empty">次の予定はまだありません</div>`)+weekHtml
       +(later.length?`<div class="sec-h"><h2>これからの予定</h2><button class="link" data-tab-go="cal">カレンダーで見る</button></div><div class="list">${later.map(eventRow).join("")}</div>`:"");
     return;
@@ -540,6 +591,14 @@ function renderHome(){
     h+=`<div class="sec-h"><h2>返事がまだの予定 <span class="muted" style="font-size:13px">${unanswered.length}件</span></h2></div><div class="list">${unanswered.slice(0,5).map(e=>`<div class="qa">${eventRow(e)}<div class="rsvp mini" role="group" aria-label="出欠">${[["yes","参加"],["maybe","未定"],["no","不参加"]].map(([k,l])=>`<button class="${k}" data-rsvp="${k}" data-eid="${esc(e.id)}">${l}</button>`).join("")}</div></div>`).join("")}</div>`;
   }
   h+=`<div class="sec-h"><h2>参加予定</h2></div>`+(going.length?`<div class="list">${going.slice(0,6).map(eventRow).join("")}</div>`:`<div class="empty">参加予定の勉強会はまだありません</div>`);
+  const tnow=Date.now();
+  const myOut=new Set(S.outputs.filter(o=>o.uid===myId).map(o=>o.eventId));
+  const toReflect=sortedEvents().filter(e=>evStart(e).getTime()<=tnow && tnow-evStart(e).getTime()<14*864e5 && ((e.attended||[]).includes(myId)||mine[e.id]==="yes") && !myOut.has(e.id)).reverse().slice(0,3);
+  if(toReflect.length) h+=`<div class="sec-h"><h2>ふりかえりを書こう</h2><span class="small muted">${toReflect.length}件</span></div><div class="list">${toReflect.map(eventRow).join("")}</div>`;
+  const fbNew=[...S.fbIn].sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,3);
+  if(fbNew.length) h+=`<div class="sec-h"><h2>あなたへのフィードバック</h2><span class="lock">🔒 あなただけに表示</span></div><div class="list">${fbNew.map(f=>{const e=S.events.find(x=>x.id===f.eventId);return `<button class="fbwrap" data-ev="${esc(f.eventId)}">${e?`<span class="out-ev">${md(e.date)} ${esc(evTitle(e))}</span>`:""}${fbItem(f)}</button>`}).join("")}</div>`;
+  const feed=S.outputs.filter(o=>o.learned).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,5);
+  if(feed.length) h+=`<div class="sec-h"><h2>みんなのアウトプット</h2></div><div class="outs">${feed.map(o=>outItem(o,true)).join("")}</div>`;
   h+=`<div class="sec-h"><h2>目標とメモ</h2><span class="lock">🔒 自分だけに表示</span></div>
   <div class="card memo-card"><div class="field"><label for="my-goal">今の目標</label><textarea id="my-goal" maxlength="500" placeholder="例:12月までに関係詞まで終わらせる">${esc(goal)}</textarea></div>
   <div class="field"><label for="my-memo">メモ・振り返り</label><textarea id="my-memo" maxlength="3000" placeholder="例:現在完了と過去形の違いがまだあいまい">${esc(memo)}</textarea></div>
@@ -552,7 +611,7 @@ function renderHome(){
   $("#v-home").innerHTML=h;
   if(fid){const el=$("#"+fid); if(el){el.focus(); try{el.setSelectionRange(sel[0],sel[1])}catch(e){}}}
 }
-function lockHtml(title,desc){return `<div class="card reg" style="text-align:center;padding:28px 18px"><div style="font-size:30px" aria-hidden="true">🔒</div><h3>${title}はメンバー限定です</h3><p class="muted small" style="margin:4px 0 14px">${desc}</p><div class="row" style="justify-content:center"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div></div>`}
+function lockHtml(title,desc){const act=S.auth?`<button class="btn primary" data-act="register">招待コードを入力する</button>`:`<button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button>`;return `<div class="card reg" style="text-align:center;padding:28px 18px"><div style="font-size:30px" aria-hidden="true">🔒</div><h3>${title}はメンバー限定です</h3><p class="muted small" style="margin:4px 0 14px">${desc}</p><div class="row" style="justify-content:center">${act}</div></div>`}
 function cdHtml(ms, msEnd){
   if(ms<=0) return msEnd>0?`<div class="cd" style="background:var(--lime);color:var(--ink)"><b>NOW</b><span style="color:inherit">開催中</span></div>`:"";
   const d=Math.floor(ms/864e5), h=Math.floor(ms%864e5/36e5), m=Math.floor(ms%36e5/6e4);
@@ -599,7 +658,7 @@ function rankRow(id,i,st,mode){
   return `<div class="rank${id===myId?" me":""}"><span class="pos">${medal||i+1}</span>${avatar(id)}<span class="who"><b>${esc(mname(id))}${id===myId?" (あなた)":""}</b><span class="streak">🔥 ${s.streak}連続</span>${s.streak>=1?` <span class="nudge">· 次で${s.streak+1}連続!</span>`:` <span class="small muted">· 次の参加でスタート</span>`}</span><span class="cnt">${n}<small>回</small></span></div>`;
 }
 function renderRank(){
-  if(!S.auth){$("#v-rank").innerHTML=lockHtml("参加ランキング","ログインすると、参加回数ランキング・🔥ストリーク・バッジが見られます。");return}
+  if(!S.isMember){$("#v-rank").innerHTML=lockHtml("参加ランキング","ログインすると、参加回数ランキング・🔥ストリーク・バッジが見られます。");return}
   const st=stats(); const ids=Object.keys(st).sort((x,y)=>(rankMode==="month"?st[y].month-st[x].month:st[y].count-st[x].count)||st[y].streak-st[x].streak);
   let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="font-family:var(--display);font-size:20px;margin:0">参加ランキング</h2><div class="seg"><button class="${rankMode==="all"?"on":""}" data-rank="all">全期間</button><button class="${rankMode==="month"?"on":""}" data-rank="month">今月</button></div></div>`;
   if(!ids.length){$("#v-rank").innerHTML=h+`<div class="empty">メンバーが登録されるとここに表示されます</div>`;return}
@@ -618,7 +677,7 @@ function renderRank(){
 
 /* ---------- render: grammar ---------- */
 function renderGram(){
-  if(!S.auth){$("#v-gram").innerHTML=lockHtml("文法の進み具合","ログインすると、全体の進捗と、自分だけの理解度メモ(◎○△)が使えます。");return}
+  if(!S.isMember){$("#v-gram").innerHTML=lockHtml("文法の進み具合","ログインすると、全体の進捗と、自分だけの理解度メモ(◎○△)が使えます。");return}
   const done=UNITS.filter(u=>S.progress[u[0]]==="done").length, doing=UNITS.filter(u=>S.progress[u[0]]==="doing").length;
   const pct=Math.round(done/UNITS.length*100);
   const und=S.priv.understanding||{};
@@ -637,13 +696,13 @@ function renderGram(){
 
 /* ---------- render: members ---------- */
 function renderMem(){
-  if(!S.auth){$("#v-mem").innerHTML=lockHtml("メンバー一覧","ログインすると、メンバーの得意分野や授業の担当履歴が見られます。");return}
+  if(!S.isMember){$("#v-mem").innerHTML=lockHtml("メンバー一覧","ログインすると、メンバーの得意分野や授業の担当履歴が見られます。");return}
   const st=stats(); const ids=memberIds();
   let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="font-family:var(--display);font-size:20px;margin:0">メンバー <span class="muted" style="font-size:14px">${ids.length}人</span></h2>${myId&&S.members[myId]?`<button class="btn" style="min-height:42px" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" style="min-height:42px" data-act="register">メンバー登録</button>`}</div>`;
   const notYet=ids.filter(id=>!st[id].taught.length);
   if(notYet.length) h+=`<div class="card"><b>まだ授業を担当していない人</b><p class="small muted" style="margin:2px 0 10px">次のメンバー授業の担当決めの参考に。</p><div class="tbd">${notYet.map(id=>`<span>${avatar(id)}${esc(mname(id))}</span>`).join("")}</div></div>`;
   if(!ids.length) h+=`<div class="empty">まだ誰も登録していません</div>`;
-  h+=`<div class="list">${ids.map(id=>{const m=S.members[id],s=st[id];return `<div class="mem">${avatar(id,"lg")}<div class="info"><b>${esc(m.name)}${id===myId?" <span class='small muted'>(あなた)</span>":""}</b><br>${m.skill?`<span class="skill">得意:${esc(m.skill)}</span>`:""}${m.bio?`<div class="small">${esc(m.bio)}</div>`:""}<div class="nums"><span><b>${s.count}</b>回参加</span><span><b>🔥${s.streak}</b>連続</span><span><b>${s.taught.length}</b>回授業</span></div>${s.taught.length?`<div class="badges">${s.taught.map(e=>`<button class="badge t-lesson" data-ev="${esc(e.id)}" style="border-color:var(--orange)">🎤 ${md(e.date)} ${esc(e.title)}</button>`).join("")}</div>`:""}${s.badges.length?`<div class="badges">${s.badges.map(b=>`<span class="badge">${b}</span>`).join("")}</div>`:""}</div></div>`}).join("")}</div>`;
+  h+=`<div class="list">${ids.map(id=>{const m=S.members[id],s=st[id];return `<div class="mem">${avatar(id,"lg")}<div class="info"><b>${esc(m.name)}${id===myId?" <span class='small muted'>(あなた)</span>":""}</b><br>${m.skill?`<span class="skill">得意:${esc(m.skill)}</span>`:""}${m.bio?`<div class="small">${esc(m.bio)}</div>`:""}<div class="nums"><span><b>${s.count}</b>回参加</span><span><b>🔥${s.streak}</b>連続</span><span><b>${s.taught.length}</b>回授業</span><span><b>${s.outs}</b>アウトプット</span></div>${s.taught.length?`<div class="badges">${s.taught.map(e=>`<button class="badge t-lesson" data-ev="${esc(e.id)}" style="border-color:var(--orange)">🎤 ${md(e.date)} ${esc(e.title)}</button>`).join("")}</div>`:""}${s.badges.length?`<div class="badges">${s.badges.map(b=>`<span class="badge">${b}</span>`).join("")}</div>`:""}</div></div>`}).join("")}</div>`;
   $("#v-mem").innerHTML=h;
 }
 
@@ -651,15 +710,15 @@ function renderHeader(){
   $("#appName").textContent=S.appName||"英語勉強会(仮)";
   $("#meBtn").innerHTML = myId&&S.members[myId]?avatar(myId):`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`;
   $("#fab").hidden=!S.canWrite;
-  const hb=document.querySelector('nav.tabs [data-tab="home"]'); if(hb) hb.lastChild.textContent=S.auth?"マイホーム":"ホーム";
+  const hb=document.querySelector('nav.tabs [data-tab="home"]'); if(hb) hb.lastChild.textContent=S.isMember?"マイホーム":"ホーム";
   $("#meBtn").setAttribute("aria-label",S.auth?"アカウント":"ログイン");
 }
 function render(){
   renderHeader();
-  ({home:renderHome,cal:renderCal,rank:renderRank,gram:renderGram,mem:renderMem})[tab]();
+  ({home:renderHome,cal:renderCal,rank:renderRank,gram:renderGram,mem:renderMem,theme:renderTheme})[tab]();
   if(openSheet.refresh) openSheet.refresh();
 }
-function setTab(t){tab=t;document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));["home","cal","rank","gram","mem"].forEach(k=>$("#v-"+k).hidden=k!==t);render();window.scrollTo({top:0})}
+function setTab(t){tab=t;document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));["home","cal","rank","gram","mem","theme"].forEach(k=>$("#v-"+k).hidden=k!==t);render();window.scrollTo({top:0})}
 
 /* ---------- sheets ---------- */
 let scrim=null;
@@ -679,6 +738,8 @@ function eventSheet(id){
   const draw=()=>{
     const e=S.events.find(x=>x.id===id); if(!e){closeSheet();return}
     const box=scrim.querySelector(".stackv");
+    const keep={}; box.querySelectorAll("textarea[id],input[type=checkbox][id]").forEach(el=>keep[el.id]=el.type==="checkbox"?el.checked:el.value);
+    const fa=document.activeElement, fid=fa&&fa.id&&keep[fa.id]!==undefined?fa.id:null, sel=fid&&fa.selectionStart!=null?[fa.selectionStart,fa.selectionEnd]:null;
     const isPast = e.date<=todayStr();
     const att=new Set(e.attended||[]); const r=rsvpOf(e.id);
     const title = e.type==="grammar"&&e.unit?UNIT_MAP[e.unit]?.[1]+(e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?" — "+e.title:""):e.title;
@@ -691,12 +752,17 @@ function eventSheet(id){
       ${e.memo?`<div><span class="k">メモ</span><span style="white-space:pre-wrap">${esc(e.memo)}</span></div>`:""}
       ${e.link?`<div><span class="k">資料</span><a href="${esc(e.link)}" target="_blank" rel="noopener">${esc(e.link)}</a></div>`:""}
     </div>
-    ${S.auth?(!isPast||evEnd(e)>new Date()?rsvpBlock(e):""):`<p class="small muted" style="margin:0">出欠の返事はログインすると押せます。</p>`}
-    ${S.auth&&Object.keys(r).length?`<div class="rsvp-list muted">${["yes","maybe","no"].map(k=>{const p=Object.keys(r).filter(u=>r[u]===k&&S.members[u]);return p.length?`<div><b style="color:var(--fg)">${{yes:"参加",maybe:"未定",no:"不参加"}[k]}</b> ${p.map(u=>esc(mname(u))).join("、")}</div>`:""}).join("")}</div>`:""}
-    ${isPast&&S.auth?`<div class="divider"></div><div><b>出席チェック</b><p class="small muted" style="margin:2px 0 10px">実際に来た人をタップ。ランキングとストリークに反映されます。</p><div class="att">${memberIds().map(m=>`<button class="${att.has(m)?"on":""}" data-att="${esc(m)}" ${S.canWrite?"":"disabled"}>${avatar(m)}${esc(mname(m))}${att.has(m)?" ✓":""}</button>`).join("")||`<span class="small muted">メンバーがいません</span>`}</div></div>`:""}
+    ${evEnd(e)>new Date()?`<div class="field"><label>カレンダーに追加</label>${calButtons(e)}</div>`:""}
+    ${checkinHtml(e)}
+    ${S.isMember?(!isPast||evEnd(e)>new Date()?rsvpBlock(e):""):`<p class="small muted" style="margin:0">出欠の返事はログインすると押せます。</p>`}
+    ${S.isMember&&Object.keys(r).length?`<div class="rsvp-list muted">${["yes","maybe","no"].map(k=>{const p=Object.keys(r).filter(u=>r[u]===k&&S.members[u]);return p.length?`<div><b style="color:var(--fg)">${{yes:"参加",maybe:"未定",no:"不参加"}[k]}</b> ${p.map(u=>esc(mname(u))).join("、")}</div>`:""}).join("")}</div>`:""}
+    ${isPast&&S.isMember?`<div class="divider"></div><div><b>出席チェック</b><p class="small muted" style="margin:2px 0 10px">実際に来た人をタップ。ランキングとストリークに反映されます。</p><div class="att">${memberIds().map(m=>`<button class="${att.has(m)?"on":""}" data-att="${esc(m)}" ${S.canWrite?"":"disabled"}>${avatar(m)}${esc(mname(m))}${att.has(m)?" ✓":""}</button>`).join("")||`<span class="small muted">メンバーがいません</span>`}</div></div>`:""}
+    ${reflectHtml(e)}
     <div class="divider"></div>
     <button class="btn line block" data-copy="${esc(e.id)}">${lineIcon()}LINE用にコピー</button>
-    ${S.canWrite?`<div class="row"><button class="btn" data-edit="${esc(e.id)}">編集</button><button class="btn danger" id="delBtn">削除</button></div>`:""}`;
+    ${S.canWrite?`<div class="row"><button class="btn" data-edit="${esc(e.id)}">編集</button>${canDelete(e)?`<button class="btn danger" id="delBtn">削除</button>`:""}</div>${canDelete(e)?"":`<p class="small muted" style="margin:0">削除できるのは、この予定を作った人と${esc(S.members[ADMIN_UIDS[0]]?.name||"管理者")}さんだけです。</p>`}`:""}`;
+    for(const k in keep){ const el=box.querySelector("#"+CSS.escape(k)); if(el){ if(el.type==="checkbox") el.checked=keep[k]; else el.value=keep[k]; } }
+    if(fid){ const el=box.querySelector("#"+CSS.escape(fid)); if(el){ el.focus(); if(sel) try{el.setSelectionRange(sel[0],sel[1])}catch(_){} } }
     const del=box.querySelector("#delBtn");
     if(del) del.onclick=async()=>{
       if(del.dataset.armed){ try{await db.doc("events/"+id).delete(); for(const x of S.rsvps.filter(x=>x.eventId===id)) await db.doc("rsvps/"+x.id).delete(); closeSheet(); toast("予定を削除しました")}catch(err){toast("削除できませんでした")} }
@@ -706,8 +772,9 @@ function eventSheet(id){
   openSheet("",draw); draw();
 }
 
-function editSheet(id, presetDate){
-  const e = id?{...S.events.find(x=>x.id===id)}:{type:"grammar",date:presetDate||todayStr(),start:"18:00",end:"19:00",place:"",map:"",hostId:myId&&S.members[myId]?myId:"",unit:(UNITS.find(u=>S.progress[u[0]]!=="done")||UNITS[0])[0],title:"",memo:"",link:""};
+function editSheet(id, presetDate, preset){
+  preset=preset||{};
+  const e = id?{...S.events.find(x=>x.id===id)}:{...{type:"grammar",date:presetDate||todayStr(),start:"18:00",end:"19:00",place:"",map:"",hostId:myId&&S.members[myId]?myId:"",unit:(UNITS.find(u=>S.progress[u[0]]!=="done")||UNITS[0])[0],title:"",memo:"",link:""},...preset};
   const box=openSheet(`<h3>${id?"予定を編集":"予定を追加"}</h3>
   <div class="field"><label>種類</label><div class="typepick">${Object.entries(TYPES).map(([k,l])=>`<button type="button" class="t-${k}${e.type===k?" on":""}" data-type="${k}">${l}</button>`).join("")}</div></div>
   <div class="field" id="unitF"><label for="f-unit">文法の単元</label><select id="f-unit">${UNITS.map(u=>`<option value="${u[0]}"${e.unit===u[0]?" selected":""}>${u[1]}</option>`).join("")}</select></div>
@@ -726,16 +793,16 @@ function editSheet(id, presetDate){
   box.querySelector("#mkMap").onclick=()=>{const p=box.querySelector("#f-place").value.trim();if(!p){toast("先に場所を入力してください");return}box.querySelector("#f-map").value=mapUrl(p);toast("地図リンクを作りました")};
   box.querySelector("#saveEv").onclick=async(ev)=>{
     const v=k=>box.querySelector("#f-"+k).value.trim();
-    const data={type,date:v("date"),start:v("start"),end:v("end"),place:v("place"),map:v("map"),hostId:v("host"),unit:type==="grammar"?v("unit"):"",title:v("title"),memo:v("memo"),link:v("link"),attended:e.attended||[],sample:!!e.sample};
+    const data={type,date:v("date"),start:v("start"),end:v("end"),place:v("place"),map:v("map"),hostId:v("host"),unit:type==="grammar"?v("unit"):"",title:v("title"),memo:v("memo"),link:v("link"),attended:e.attended||[],sample:!!e.sample,createdBy:e.createdBy||"",createdAt:e.createdAt||0};
     if(type!=="grammar"&&!data.title){toast("タイトルを入力してください");return}
     if(type==="grammar"&&!data.title) data.title=UNIT_MAP[data.unit][1];
     if(!data.date){toast("日付を入力してください");return}
     ev.target.disabled=true;
     try{
       if(id) await db.doc("events/"+id).set(data);
-      else { data.createdBy=myId||""; await db.collection("events").doc().set(data); }
+      else { data.createdBy=myId||""; data.createdAt=Date.now(); const ref=db.collection("events").doc(); await ref.set(data); if(preset.themeId) await db.doc("themes/"+preset.themeId).update({status:"scheduled",eventId:ref.id}).catch(()=>{}); }
       if(type==="grammar" && (S.progress[data.unit]||"todo")==="todo" && data.date<=todayStr()) await setUnit(data.unit,"doing");
-      closeSheet(); toast(id?"予定を更新しました":"予定を追加しました");
+      closeSheet(); toast(id?"予定を更新しました":"予定を追加しました。メンバーにメールでお知らせします");
     }catch(err){ev.target.disabled=false;toast(err?.code==="quota_exceeded"?"保存できる上限に達しました。古い予定を消してください":"保存できませんでした。もう一度試してください")}
   };
 }
@@ -746,14 +813,21 @@ function profileSheet(isNew){
   <div class="field"><label for="p-name">名前(みんなに表示されます)</label><input id="p-name" value="${esc(m.name)}" placeholder="例:しんたろう" maxlength="20"></div>
   <div class="field"><label for="p-skill">得意分野・教えられること</label><input id="p-skill" value="${esc(m.skill)}" placeholder="例:プレゼン、統計、韓国語" maxlength="40"></div>
   <div class="field"><label for="p-bio">ひとこと</label><input id="p-bio" value="${esc(m.bio)}" placeholder="例:毎回参加目指します!" maxlength="60"></div>
+  ${isNew?`<div class="field"><label for="p-invite">招待コード</label><input id="p-invite" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="森山さんから聞いたコード" maxlength="20"></div>`:""}
   <div class="row"><button class="btn" data-close>キャンセル</button><button class="btn primary" id="saveP">${isNew?"登録する":"保存する"}</button></div>`);
   box.querySelector("#saveP").onclick=async(ev)=>{
     const name=box.querySelector("#p-name").value.trim(); if(!name){toast("名前を入力してください");return}
     ev.target.disabled=true;
     const id = myId; if(!id){ev.target.disabled=false;closeSheet();authSheet("login");return}
-    const data={name,skill:box.querySelector("#p-skill").value.trim(),bio:box.querySelector("#p-bio").value.trim(),joinedAt:m.joinedAt||Date.now()};
-    try{ await db.doc("members/"+id).set(data); closeSheet(); if(isNew){toast(`ようこそ、${name}さん!`);confetti()}else toast("保存しました"); render(); }
-    catch(err){ev.target.disabled=false;toast("保存できませんでした。もう一度試してください")}
+    const data={name,skill:box.querySelector("#p-skill").value.trim(),bio:box.querySelector("#p-bio").value.trim()};
+    try{
+      if(isNew){
+        const code=normCode(box.querySelector("#p-invite").value); if(!code){ev.target.disabled=false;toast("招待コードを入力してください");return}
+        await db.doc("members/"+id).set({...data,joinedAt:Date.now(),inviteCode:code});
+        db.doc("contacts/"+id).set({email:S.auth.email||"",notify:true},{merge:true}).catch(()=>{});
+      } else await db.doc("members/"+id).update(data);
+      closeSheet(); if(isNew){toast(`ようこそ、${name}さん!`);confetti()}else toast("保存しました"); render();
+    }catch(err){ev.target.disabled=false;toast(isNew&&err&&err.code==="permission-denied"?"招待コードが違います。森山さんに確認してください":"保存できませんでした。もう一度試してください")}
   };
 }
 function authErr(e){
@@ -765,7 +839,8 @@ function authSheet(mode="login", email=""){
   <h3>${su?"アカウントを作る":"おかえりなさい"}</h3>
   ${su?`<p class="small muted" style="margin:0">メールアドレスとパスワードを決めて登録します。名前はみんなに表示されます。</p>
   <div class="field"><label for="a-name">名前</label><input id="a-name" maxlength="20" placeholder="例:しんたろう" autocomplete="nickname"></div>
-  <div class="field"><label for="a-skill">得意分野・教えられること</label><input id="a-skill" maxlength="40" placeholder="例:プレゼン、統計、韓国語"></div>`:""}
+  <div class="field"><label for="a-skill">得意分野・教えられること</label><input id="a-skill" maxlength="40" placeholder="例:プレゼン、統計、韓国語"></div>
+  <div class="field"><label for="a-invite">招待コード</label><input id="a-invite" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="20" placeholder="森山さんから聞いたコード"></div>`:""}
   <div class="field"><label for="a-email">メールアドレス</label><input id="a-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${esc(email)}"></div>
   <div class="field"><label for="a-pass">パスワード${su?"(6文字以上)":""}</label><input id="a-pass" type="password" autocomplete="${su?"new-password":"current-password"}"></div>
   <p class="small" id="a-msg" style="margin:0;color:var(--danger)" role="alert"></p>
@@ -779,13 +854,16 @@ function authSheet(mode="login", email=""){
   box.querySelector("#a-go").onclick=async(ev)=>{
     const em=v("a-email"), pw=box.querySelector("#a-pass").value;
     if(su&&!v("a-name")){msg("名前を入力してください");return}
+    if(su&&!normCode(v("a-invite"))){msg("招待コードを入力してください");return}
     if(!em){msg("メールアドレスを入力してください");return}
     if(!pw){msg("パスワードを入力してください");return}
     ev.target.disabled=true; msg("");
     try{
       if(su){
         const cred=await auth.createUserWithEmailAndPassword(em,pw);
-        await db.doc("members/"+cred.user.uid).set({name:v("a-name"),skill:v("a-skill"),bio:"",joinedAt:Date.now()});
+        try{ await db.doc("members/"+cred.user.uid).set({name:v("a-name"),skill:v("a-skill"),bio:"",joinedAt:Date.now(),inviteCode:normCode(v("a-invite"))}); }
+        catch(e2){ try{ await cred.user.delete(); }catch(_){} ev.target.disabled=false; msg(e2&&e2.code==="permission-denied"?"招待コードが違います。森山さんに確認してください":"登録できませんでした。もう一度試してください"); return; }
+        db.doc("contacts/"+cred.user.uid).set({email:em,notify:true},{merge:true}).catch(()=>{});
         closeSheet(); toast(`ようこそ、${v("a-name")}さん!`); confetti();
       } else {
         await auth.signInWithEmailAndPassword(em,pw);
@@ -809,8 +887,12 @@ function settingsSheet(){
   <div class="field"><label>表示テーマ</label><div class="seg" style="align-self:flex-start">${[["system","端末に合わせる"],["dark","ダーク"],["light","ライト"]].map(([k,l])=>`<button class="${theme===k?"on":""}" data-theme-set="${k}">${l}</button>`).join("")}</div></div>
   <div class="divider"></div>
   <div class="field"><label>アカウント</label>${S.auth?`<div class="small muted" style="word-break:break-all">${esc(S.auth.email||"")} でログイン中</div><div class="row">${S.members[myId]?`<button class="btn" data-act="profile">プロフィール編集</button>`:`<button class="btn primary" data-act="register">プロフィール登録</button>`}<button class="btn danger" data-act="logout">ログアウト</button></div>`:`<div class="row"><button class="btn primary" data-act="login">ログイン</button><button class="btn" data-act="signup">新規登録</button></div>`}</div>
+  ${S.isMember?`<div class="field"><label>メール通知</label><div class="seg" style="align-self:flex-start"><button class="${S.contact.notify!==false?"on":""}" data-notify="on">受け取る</button><button class="${S.contact.notify===false?"on":""}" data-notify="off">受け取らない</button></div><p class="small muted" style="margin:0">新しい予定が追加されたときと、予約が確定したときに ${esc(S.auth.email||"")} にメールが届きます。</p></div>`:""}
+  ${isAdmin()?`<div class="divider"></div><div class="field"><label for="s-invite">招待コード(管理者だけに表示)</label><div class="inline"><input id="s-invite" value="${esc(S.invite||"")}" placeholder="例:OUTPUT2026" maxlength="20" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn primary" id="saveInvite">保存</button></div><p class="small muted" style="margin:0">${S.invite?"新しく入る人にこのコードを伝えてください。変えると、古いコードでは登録できなくなります(登録済みの人はそのまま使えます)。":"まだ設定されていません。設定するまで、誰も新規登録できません。"}</p></div>`:""}
   ${hasSample&&S.canWrite?`<div class="divider"></div><div class="field"><label>見本データ</label><p class="small muted" style="margin:0">最初から入っている「(見本)」のメンバー・予定・進捗をすべて消して、本番用にします。</p><button class="btn danger" id="clearSample">見本データを消す</button></div>`:""}
   <button class="btn block" data-close>閉じる</button>`);
+  const si=box.querySelector("#saveInvite");
+  if(si) si.onclick=async()=>{ const c=normCode(box.querySelector("#s-invite").value); if(c.length<4){toast("招待コードは4文字以上にしてください");return} try{ await db.doc("config/invite").set({code:c}); box.querySelector("#s-invite").value=c; toast("招待コードを「"+c+"」にしました"); }catch(e){ toast("保存できませんでした"); } };
   box.querySelector("#saveName").onclick=async()=>{const n=box.querySelector("#s-name").value.trim();try{await db.doc("settings/app").set({name:n});toast("名前を変更しました")}catch(e){toast("変更できませんでした")}};
   const cs=box.querySelector("#clearSample");
   if(cs) cs.onclick=async()=>{
@@ -837,11 +919,13 @@ function daySheet(s){
 /* ---------- writes ---------- */
 async function setRsvp(eid,status){
   if(!S.auth){authSheet("login");return}
-  if(!S.members[myId]){toast("先にプロフィールを登録してください");profileSheet(true);return}
+  if(!S.isMember){profileSheet(true);return}
   const docId=`${eid}__${myId}`; const cur=S.rsvps.find(r=>r.id===docId);
   try{
-    if(cur&&cur.status===status) await db.doc("rsvps/"+docId).delete();
-    else await db.doc("rsvps/"+docId).set({eventId:eid,uid:myId,status,sample:false});
+    if(cur&&cur.status===status){ await db.doc("rsvps/"+docId).delete(); return; }
+    await db.doc("rsvps/"+docId).set({eventId:eid,uid:myId,status,at:Date.now()});
+    if(status==="yes"){ const e=S.events.find(x=>x.id===eid); if(e) bookingSheet(e); }
+    else toast(status==="no"?"不参加で返事しました":"未定で返事しました");
   }catch(err){toast("送信できませんでした")}
 }
 const busy=new Set();
@@ -867,6 +951,34 @@ async function setUnit(k,status){
 document.addEventListener("click",async ev=>{
   const t=ev.target.closest("button,[data-ev]"); if(!t)return;
   const d=t.dataset;
+  if(d.ics){ const e=S.events.find(x=>x.id===d.ics); if(e) downloadIcs(e); return; }
+  if(d.checkin){
+    t.disabled=true;
+    try{ await db.doc("events/"+d.checkin).update({attended:firebase.firestore.FieldValue.arrayUnion(myId)}); setTimeout(()=>{ const st=stats()[myId]; confetti(); toast(st&&st.streak>1?`出席しました!🔥${st.streak}連続`:"出席しました!"); },400); }
+    catch(e){ t.disabled=false; toast("出席を記録できませんでした"); }
+    return;
+  }
+  if(d.reflect){
+    const e=S.events.find(x=>x.id===d.reflect); if(!e) return; const box=t.closest(".stackv"); const val=id=>(box.querySelector("#"+id)?.value||"").trim();
+    const learned=val("r-learned"), good=val("r-good"), next=val("r-next"), more=val("r-more"); const anon=!!box.querySelector("#r-anon")?.checked;
+    const isLesson=e.type==="lesson";
+    if(!learned&&!good&&!next&&!more){toast("どれか1つは書いてください");return}
+    t.disabled=true;
+    try{
+      const oid=e.id+"__"+myId;
+      await db.doc("outputs/"+oid).set({eventId:e.id,uid:myId,learned,good:isLesson?"":good,next:isLesson?"":next,at:Date.now()});
+      if(isLesson&&e.hostId&&e.hostId!==myId&&(good||more)) await db.doc("feedback/"+oid).set({eventId:e.id,uid:myId,to:e.hostId,good,more,anon,at:Date.now()});
+      toast(isLesson&&(good||more)?"ふりかえりを送りました。フィードバックも届けました":"ふりかえりを送りました"); confetti();
+    }catch(err){ toast("送れませんでした。もう一度試してください"); }
+    t.disabled=false; return;
+  }
+  if(d.notify){ try{ await db.doc("contacts/"+myId).set({notify:d.notify==="on",email:S.auth.email||""},{merge:true}); t.parentElement.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===t)); toast(d.notify==="on"?"メールを受け取ります":"メールを止めました"); }catch(e){ toast("変更できませんでした"); } return; }
+  if(d.act==="newtheme") return themeSheet();
+  if(d.tfilter){ themeFilter=d.tfilter; return renderTheme(); }
+  if(d.vote){ const th=S.themes.find(x=>x.id===d.vote); if(!th) return; const on=(th.votes||[]).includes(myId); try{ await db.doc("themes/"+th.id).update({votes:on?firebase.firestore.FieldValue.arrayRemove(myId):firebase.firestore.FieldValue.arrayUnion(myId)}); }catch(e){ toast("投票できませんでした"); } return; }
+  if(d.teach){ const th=S.themes.find(x=>x.id===d.teach); if(!th) return; try{ await db.doc("themes/"+th.id).update({teacher:th.teacher===myId?"":myId}); if(th.teacher!==myId){ toast("名乗り出ました!予定にするとみんなに知らせられます"); } }catch(e){ toast("更新できませんでした"); } return; }
+  if(d.schedule){ const th=S.themes.find(x=>x.id===d.schedule); if(!th) return; return editSheet(null,null,{type:"lesson",title:th.title,hostId:th.teacher||th.want||"",memo:th.note||"",themeId:th.id}); }
+  if(d.deltheme){ if(!t.dataset.armed){ t.dataset.armed="1"; t.textContent="本当に削除する"; t.classList.add("warn"); return; } try{ await db.doc("themes/"+d.deltheme).delete(); toast("テーマを削除しました"); }catch(e){ toast("削除できませんでした"); } return; }
   if(d.tab) return setTab(d.tab);
   if(d.tabGo) return setTab(d.tabGo);
   if(d.ev && !d.copy) return eventSheet(d.ev);
@@ -921,6 +1033,128 @@ function confetti(){
   let f=0;(function loop(){ctx.clearRect(0,0,W,H);for(const p of P){p.vy+=.7*devicePixelRatio;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);ctx.restore()}if(++f<110)requestAnimationFrame(loop);else ctx.clearRect(0,0,W,H)})();
 }
 
+/* ---------- members / permissions ---------- */
+const isAdmin=()=>!!myId&&ADMIN_UIDS.includes(myId);
+const canDelete=e=>S.isMember&&(e.createdBy===myId||isAdmin());
+const normCode=c=>String(c||"").trim().toUpperCase().replace(/\s+/g,"");
+const evTitle=e=>e.type==="grammar"&&e.unit?(UNIT_MAP[e.unit]?.[1]||"")+(e.title&&e.title!==UNIT_MAP[e.unit]?.[1]?" — "+e.title:""):(e.title||"");
+
+/* ---------- calendar ---------- */
+const addHour=t=>{const [h,m]=t.split(":").map(Number);return pad(Math.min(23,h+1))+":"+pad(m)};
+function calDetails(e){ return [TYPES[e.type]+(hostOf(e)?" / 担当 "+hostOf(e):""), e.memo||"", e.map||"", APP_URL].filter(Boolean).join("\n"); }
+function gcalUrl(e){
+  const d=e.date.replace(/-/g,""); let dates;
+  if(e.start){ dates=d+"T"+e.start.replace(":","")+"00/"+d+"T"+(e.end||addHour(e.start)).replace(":","")+"00"; }
+  else { const n=pd(e.date); n.setDate(n.getDate()+1); dates=d+"/"+ymd(n).replace(/-/g,""); }
+  const p=new URLSearchParams({action:"TEMPLATE",text:(S.appName||"英語勉強会")+":"+evTitle(e),dates,ctz:"Asia/Tokyo",details:calDetails(e),location:e.place||""});
+  return "https://calendar.google.com/calendar/render?"+p.toString();
+}
+function icsText(e){
+  const stamp=d=>d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const utc=(date,time)=>{const [y,m,dd]=date.split("-").map(Number);const [h,mi]=time.split(":").map(Number);return stamp(new Date(Date.UTC(y,m-1,dd,h-9,mi)))};
+  const escI=x=>String(x||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
+  let ds,de;
+  if(e.start){ ds="DTSTART:"+utc(e.date,e.start); de="DTEND:"+utc(e.date,e.end||addHour(e.start)); }
+  else { const n=pd(e.date); n.setDate(n.getDate()+1); ds="DTSTART;VALUE=DATE:"+e.date.replace(/-/g,""); de="DTEND;VALUE=DATE:"+ymd(n).replace(/-/g,""); }
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//study-board//JA","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT","UID:"+e.id+"@study-board","DTSTAMP:"+stamp(new Date()),ds,de,"SUMMARY:"+escI((S.appName||"英語勉強会")+":"+evTitle(e)),"LOCATION:"+escI(e.place),"DESCRIPTION:"+escI(calDetails(e)),"URL:"+APP_URL,"BEGIN:VALARM","TRIGGER:-PT1H","ACTION:DISPLAY","DESCRIPTION:"+escI("1時間後に勉強会があります"),"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+}
+function downloadIcs(e){
+  const blob=new Blob([icsText(e)],{type:"text/calendar;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="study-"+e.date+".ics";
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+}
+const calIcon=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>`;
+function calButtons(e){ return `<div class="cal-btns"><a class="btn" href="${esc(gcalUrl(e))}" target="_blank" rel="noopener">${calIcon()}Googleカレンダー</a><button class="btn" data-ics="${esc(e.id)}">${calIcon()}iPhone・その他</button></div>`; }
+function bookingSheet(e){
+  const mailOn=S.contact.notify!==false;
+  openSheet(`<div class="booked"><div class="check" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div><div class="eyebrow">BOOKED</div><h3>予約が確定しました</h3></div>
+  <div class="card meta" style="padding:14px">
+    <div><span class="k">内容</span><span><b>${esc(evTitle(e))}</b> <span class="tag t-${e.type}">${TYPES[e.type]}</span></span></div>
+    <div><span class="k">日時</span><span>${md(e.date)} ${esc(timeRange(e))}</span></div>
+    ${e.place?`<div><span class="k">場所</span><span>${esc(e.place)}${e.map?` · <a href="${esc(e.map)}" target="_blank" rel="noopener">地図</a>`:""}</span></div>`:""}
+    ${hostOf(e)?`<div><span class="k">担当</span><span>${esc(hostOf(e))}</span></div>`:""}
+  </div>
+  <div class="field"><label>カレンダーに追加</label>${calButtons(e)}</div>
+  <p class="small muted" style="margin:0">${mailOn?`確認メールを ${esc(S.auth.email||"")} に送ります(1〜2分で届きます)。`:"メール通知はオフになっています。設定から受け取るように変えられます。"}</p>
+  <button class="btn line block" data-copy="${esc(e.id)}">${lineIcon()}LINEでみんなに知らせる</button>
+  <button class="btn primary block" data-close>OK</button>`);
+  confetti();
+}
+
+/* ---------- self check-in ---------- */
+const inWindow=e=>{const n=Date.now();return n>=evStart(e).getTime()-30*6e4 && n<=evEnd(e).getTime()+3*36e5};
+function checkinHtml(e){
+  if(!S.isMember||!inWindow(e)) return "";
+  return (e.attended||[]).includes(myId)?`<div class="checked">✓ 出席済み</div>`:`<button class="btn primary block checkin" data-checkin="${esc(e.id)}">✋ 出席する</button>`;
+}
+
+/* ---------- reflection / feedback ---------- */
+function fbItem(f){ return `<div class="fb"><div class="fb-who">${f.anon?"(名前は伏せられています)":esc(mname(f.uid))}</div>${f.good?`<div><span class="fb-k good">よかった点</span>${esc(f.good)}</div>`:""}${f.more?`<div><span class="fb-k more">もっと知りたい</span>${esc(f.more)}</div>`:""}</div>`; }
+function outItem(o,withEv){
+  const e=withEv&&S.events.find(x=>x.id===o.eventId);
+  return `<div class="out">${avatar(o.uid)}<div class="out-b">${e?`<div class="out-ev">${md(e.date)} ${esc(evTitle(e))}</div>`:""}<b>${esc(mname(o.uid))}</b>${o.learned?`<p>${esc(o.learned)}</p>`:""}${o.good?`<p class="small"><span class="fb-k good">よかった</span>${esc(o.good)}</p>`:""}${o.next?`<p class="small"><span class="fb-k more">次回</span>${esc(o.next)}</p>`:""}</div></div>`;
+}
+function reflectHtml(e){
+  if(!S.isMember || Date.now()<evStart(e).getTime()) return "";
+  const mine=S.outputs.find(o=>o.id===e.id+"__"+myId)||{};
+  const isLesson=e.type==="lesson", iAmHost=isLesson&&e.hostId===myId;
+  const fbMine=S.fbMine.find(f=>f.eventId===e.id)||{};
+  const others=S.outputs.filter(o=>o.eventId===e.id&&(o.learned||o.good||o.next)).sort((a,b)=>(a.at||0)-(b.at||0));
+  let h=`<div class="divider"></div><div class="refl"><div><b>ふりかえり</b><div class="small muted">${isLesson?"「学んだこと」はみんなに、感想は担当者だけに届きます。":"書いた内容は、メンバーみんなで見られます。お互いのふりかえりを読んで次回に活かそう。"}</div></div>`;
+  h+=`<div class="field"><label for="r-learned">今日学んだこと(アウトプット)</label><textarea id="r-learned" maxlength="400" placeholder="${isLesson?"例:4Pのうち、価格の決め方が一番おもしろかった":"例:現在完了は「今とつながっている」がポイント。I have lived here for two years."}">${esc(mine.learned||"")}</textarea></div>`;
+  if(isLesson&&!iAmHost&&e.hostId){
+    h+=`<div class="fb-box"><div class="small"><b>${esc(hostOf(e)||"担当者")}さんへのフィードバック</b> <span class="lock">🔒 担当者だけに届きます</span></div>
+      <div class="field"><label for="r-good">よかった点</label><textarea id="r-good" maxlength="300" placeholder="例:身近な例えでわかりやすかった">${esc(fbMine.good||"")}</textarea></div>
+      <div class="field"><label for="r-more">もっと知りたい点</label><textarea id="r-more" maxlength="300" placeholder="例:実際の企業の事例も聞きたい">${esc(fbMine.more||"")}</textarea></div>
+      <label class="chk"><input type="checkbox" id="r-anon" ${fbMine.anon?"checked":""}> 名前を伏せて届ける</label></div>`;
+  } else if(!isLesson){
+    h+=`<div class="field"><label for="r-good">よかったこと</label><textarea id="r-good" maxlength="300" placeholder="例:例文を出し合うのが楽しかった">${esc(mine.good||"")}</textarea></div>
+      <div class="field"><label for="r-next">次回やってみたいこと</label><textarea id="r-next" maxlength="300" placeholder="例:最後にミニクイズで確認したい">${esc(mine.next||"")}</textarea></div>`;
+  }
+  h+=`<button class="btn primary block" data-reflect="${esc(e.id)}">${mine.at?"ふりかえりを更新する":"ふりかえりを送る"}</button>`;
+  if(iAmHost){ const fb=S.fbIn.filter(f=>f.eventId===e.id).sort((a,b)=>(a.at||0)-(b.at||0)); h+=`<div class="fb-box"><div class="small"><b>みんなからのフィードバック(${fb.length}件)</b> <span class="lock">🔒 あなただけに表示</span></div>${fb.length?fb.map(fbItem).join(""):`<p class="small muted" style="margin:0">まだ届いていません</p>`}</div>`; }
+  if(others.length) h+=`<div class="outs"><b class="small">みんなのアウトプット</b>${others.map(o=>outItem(o)).join("")}</div>`;
+  return h+`</div>`;
+}
+
+/* ---------- theme board ---------- */
+function themeCard(t){
+  const v=t.votes||[]; const voted=v.includes(myId); const ev=t.eventId&&S.events.find(e=>e.id===t.eventId);
+  const canManage=t.by===myId||isAdmin(); const open=t.status!=="scheduled";
+  const canTeach=open&&(!t.teacher||t.teacher===myId);
+  const canSchedule=open&&(t.teacher===myId||canManage);
+  return `<div class="theme"><button class="vote${voted?" on":""}" data-vote="${esc(t.id)}" aria-pressed="${voted}" aria-label="聞きたい ${v.length}票"><span aria-hidden="true">👍</span><b>${v.length}</b></button>
+  <div class="th-b"><b class="th-t">${esc(t.title)}</b>${t.note?`<p class="small">${esc(t.note)}</p>`:""}
+  <div class="small muted">${esc(mname(t.by))}さんの投稿${t.want?` · ${esc(mname(t.want))}さんに聞きたい`:""}</div>
+  ${t.teacher?`<div class="teach">🎤 ${esc(mname(t.teacher))}さんが教えられる!</div>`:""}
+  ${ev?`<div><button class="badge t-lesson" data-ev="${esc(ev.id)}" style="border-color:var(--orange)">📅 ${md(ev.date)} に授業予定</button></div>`:""}
+  <div class="th-act">${canTeach?`<button class="mini-btn" data-teach="${esc(t.id)}">${t.teacher===myId?"名乗りを取り消す":"🙋 教えられる"}</button>`:""}${canSchedule?`<button class="mini-btn hot" data-schedule="${esc(t.id)}">📅 授業の予定にする</button>`:""}${canManage?`<button class="mini-btn" data-deltheme="${esc(t.id)}">削除</button>`:""}</div></div></div>`;
+}
+function renderTheme(){
+  if(!S.isMember){$("#v-theme").innerHTML=lockHtml("聞きたいテーマ","ログインすると、聞きたいテーマを投稿したり、投票したりできます。");return}
+  const openN=S.themes.filter(t=>t.status!=="scheduled").length, doneN=S.themes.length-openN;
+  const list=S.themes.filter(t=>themeFilter==="open"?t.status!=="scheduled":t.status==="scheduled").sort((a,b)=>(b.votes||[]).length-(a.votes||[]).length||(b.at||0)-(a.at||0));
+  let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 class="vh">聞きたいテーマ</h2><button class="btn primary" style="min-height:42px" data-act="newtheme">+ 投稿する</button></div>
+  <p class="small muted" style="margin:0 2px">「これを教えてほしい」「この人の話を聞きたい」を投稿して、聞きたいものに👍。教えられる人は名乗り出て、そのままメンバー授業の予定にできます。</p>
+  <div class="seg" style="align-self:flex-start"><button class="${themeFilter==="open"?"on":""}" data-tfilter="open">募集中 ${openN}</button><button class="${themeFilter==="done"?"on":""}" data-tfilter="done">予定になった ${doneN}</button></div>`;
+  h+=list.length?`<div class="list">${list.map(themeCard).join("")}</div>`:`<div class="empty">${themeFilter==="open"?"まだテーマがありません。最初の1つを投稿しよう!":"まだ予定になったテーマはありません"}</div>`;
+  $("#v-theme").innerHTML=h;
+}
+function themeSheet(){
+  const box=openSheet(`<h3>聞きたいテーマを投稿</h3>
+  <div class="field"><label for="t-title">テーマ</label><input id="t-title" maxlength="60" placeholder="例:就活で使えるプレゼンのコツ"></div>
+  <div class="field"><label for="t-note">くわしく(任意)</label><textarea id="t-note" maxlength="300" placeholder="例:面接での話し方も知りたい"></textarea></div>
+  <div class="field"><label for="t-want">この人に聞きたい(任意)</label><select id="t-want"><option value="">だれでも</option>${memberIds().filter(m=>m!==myId).map(m=>`<option value="${esc(m)}">${esc(mname(m))}${S.members[m].skill?"(得意:"+esc(S.members[m].skill)+")":""}</option>`).join("")}</select></div>
+  <div class="row"><button class="btn" data-close>キャンセル</button><button class="btn primary" id="t-save">投稿する</button></div>`);
+  box.querySelector("#t-save").onclick=async ev=>{
+    const g=id=>box.querySelector("#"+id).value.trim(); const title=g("t-title"); if(!title){toast("テーマを入力してください");return}
+    ev.target.disabled=true;
+    try{ await db.collection("themes").add({title,note:g("t-note"),want:g("t-want"),by:myId,votes:[myId],teacher:"",status:"open",eventId:"",at:Date.now()}); closeSheet(); toast("テーマを投稿しました"); }
+    catch(e){ ev.target.disabled=false; toast("投稿できませんでした"); }
+  };
+  setTimeout(()=>box.querySelector("#t-title")?.focus(),250);
+}
+
 /* ---------- splash ---------- */
 let splashDone=false;
 function hideSplash(){
@@ -930,7 +1164,7 @@ function hideSplash(){
   const wait=reduce?0:Math.max(0,1900-performance.now());
   setTimeout(()=>{ el.classList.add("out"); setTimeout(()=>el.remove(),600); },wait);
 }
-function maybeHideSplash(){ if(S.ready.e && S.authReady) hideSplash(); }
+function maybeHideSplash(){ if(S.ready.e && S.authReady && (!S.auth || S.memberChecked)) hideSplash(); }
 setTimeout(()=>{ const w=$("#spWait"); if(w&&!splashDone) w.classList.add("on"); },3500);
 setTimeout(hideSplash,9000);
 
@@ -953,14 +1187,28 @@ function setStatus(html){$("#status").innerHTML=html}
   const fail=e=>{ if(e&&e.code==="permission-denied"&&!auth.currentUser) return; clearTimeout(timer); hideSplash(); setStatus(`<div class="banner warn">データを読み込めませんでした(${esc(e&&e.code||"error")})。ページを再読み込みしてください。</div>`) };
   db.collection("events").onSnapshot(s=>{S.events=s.docs.map(d=>({id:d.id,...d.data()})); if(!s.metadata.fromCache){S.ready.e=1;clearTimeout(timer);setStatus("");maybeHideSplash()} render()},fail);
   db.doc("settings/app").onSnapshot(s=>{S.appName=s.exists?(s.data().name||""):""; if(S.appName) ls.set("appName",S.appName); else ls.del("appName"); render()},fail);
+  const startMemberSubs=u=>{
+    const add=f=>unsubs.push(f), docs=s=>s.docs.map(d=>({id:d.id,...d.data()}));
+    add(db.collection("members").onSnapshot(s=>{S.members={};s.docs.forEach(d=>S.members[d.id]=d.data());render()},fail));
+    add(db.collection("rsvps").onSnapshot(s=>{S.rsvps=docs(s);render()},fail));
+    add(db.doc("grammar/progress").onSnapshot(s=>{const d=s.exists?s.data():{};S.progress=d.statuses||{};S.progressSample=!!d.sample;render()},fail));
+    add(db.collection("outputs").onSnapshot(s=>{S.outputs=docs(s);render()},fail));
+    add(db.collection("themes").onSnapshot(s=>{S.themes=docs(s);render()},fail));
+    add(db.collection("feedback").where("to","==",u.uid).onSnapshot(s=>{S.fbIn=docs(s);render()},fail));
+    add(db.collection("feedback").where("uid","==",u.uid).onSnapshot(s=>{S.fbMine=docs(s);render()},fail));
+    if(isAdmin()) add(db.doc("config/invite").onSnapshot(s=>{S.invite=s.exists?(s.data().code||null):null},fail));
+  };
   auth.onAuthStateChanged(u=>{
     unsubs.forEach(f=>f()); unsubs=[];
-    S.auth=u; myId=u?u.uid:null; S.canWrite=!!u; S.authReady=true;
-    S.members={}; S.rsvps=[]; S.progress={}; S.priv={}; draft=null;
+    S.auth=u; myId=u?u.uid:null; S.isMember=false; S.canWrite=false; S.memberChecked=false; S.authReady=true;
+    S.members={}; S.rsvps=[]; S.progress={}; S.priv={}; S.outputs=[]; S.fbIn=[]; S.fbMine=[]; S.themes=[]; S.invite=null; S.contact={}; draft=null;
     if(u){
-      unsubs.push(db.collection("members").onSnapshot(s=>{S.members={};s.docs.forEach(d=>S.members[d.id]=d.data());render()},fail));
-      unsubs.push(db.collection("rsvps").onSnapshot(s=>{S.rsvps=s.docs.map(d=>({id:d.id,...d.data()}));render()},fail));
-      unsubs.push(db.doc("grammar/progress").onSnapshot(s=>{const d=s.exists?s.data():{};S.progress=d.statuses||{};S.progressSample=!!d.sample;render()},fail));
+      unsubs.push(db.doc("members/"+u.uid).onSnapshot(s=>{
+        S.memberChecked=true;
+        if(s.exists){ S.members[u.uid]={...S.members[u.uid],...s.data()}; if(!S.isMember){ S.isMember=true; S.canWrite=true; startMemberSubs(u); } }
+        render(); maybeHideSplash();
+      },fail));
+      unsubs.push(db.doc("contacts/"+u.uid).onSnapshot(s=>{ S.contact=s.exists?s.data():{}; if(u.email&&S.contact.email!==u.email) db.doc("contacts/"+u.uid).set({email:u.email},{merge:true}).catch(()=>{}); },()=>{}));
       unsubs.push(db.doc("users/"+u.uid+"/private/notes").onSnapshot(s=>{S.priv=s.exists?s.data():{};render()},fail));
     }
     render(); maybeHideSplash();

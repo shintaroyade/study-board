@@ -1,19 +1,64 @@
 rules_version = '2';
 // 勉強会アプリ用ルール
-// ・予定と勉強会の名前:誰でも見られる(書き込みはログインした人だけ)
-// ・メンバー/出欠/文法の進捗:ログインした人だけ
-// ・目標メモ・理解度(users/本人のID/...):本人しか読み書きできない
+// ・予定と勉強会の名前:誰でも見られる
+// ・それ以外はメンバー(招待コードで登録した人)だけ
+// ・予定を消せるのは、作った人と管理者(森山さん)だけ
+// ・目標メモ・理解度・メールアドレス:本人だけ
+// ・授業へのフィードバック:送った人と担当者だけ
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function small() { return request.resource == null || request.resource.data.size() <= 20; }
+    function me() { return request.auth.uid; }
+    function isAdmin() { return signedIn() && (me() == "L8IGhzLvCqVWjKxoLXQgDYsc8lH3" || exists(/databases/$(database)/documents/admins/$(me()))); }
+    function isMember() { return signedIn() && exists(/databases/$(database)/documents/members/$(me())); }
+    function nd() { return request.resource.data; }
+    function small() { return nd().size() <= 24; }
 
-    match /events/{id}   { allow read: if true;       allow write: if signedIn() && small(); }
-    match /settings/{id} { allow read: if true;       allow write: if signedIn() && id == "app"; }
-    match /members/{uid} { allow read: if signedIn(); allow write: if signedIn() && request.auth.uid == uid && small(); }
-    match /rsvps/{id}    { allow read: if signedIn(); allow write: if signedIn() && small() && (request.resource == null || request.resource.data.uid == request.auth.uid); }
-    match /grammar/{id}  { allow read: if signedIn(); allow write: if signedIn() && id == "progress"; }
-    match /users/{uid}/{document=**} { allow read, write: if signedIn() && request.auth.uid == uid; }
+    match /events/{id} {
+      allow read: if true;
+      allow create: if isMember() && small() && nd().createdBy == me();
+      allow update: if isMember() && small() && nd().get('createdBy', '') == resource.data.get('createdBy', '');
+      allow delete: if isMember() && (resource.data.get('createdBy', '') == me() || isAdmin());
+    }
+    match /settings/{id} { allow read: if true; allow write: if isMember() && id == "app"; }
+
+    match /members/{uid} {
+      allow get: if (signedIn() && me() == uid) || isMember();
+      allow list: if isMember();
+      allow create: if signedIn() && me() == uid && small()
+                    && nd().inviteCode == get(/databases/$(database)/documents/config/invite).data.code;
+      allow update: if signedIn() && me() == uid && small()
+                    && nd().get('inviteCode', '') == resource.data.get('inviteCode', '');
+      allow delete: if signedIn() && (me() == uid || isAdmin());
+    }
+
+    match /rsvps/{id} {
+      allow read: if isMember();
+      allow create, update: if isMember() && small() && nd().uid == me();
+      allow delete: if isMember();
+    }
+    match /grammar/{id} { allow read: if isMember(); allow write: if isMember() && id == "progress"; }
+
+    match /outputs/{id} {
+      allow read: if isMember();
+      allow create, update: if isMember() && small() && nd().uid == me() && id == nd().eventId + "__" + me();
+      allow delete: if isMember() && (resource.data.uid == me() || isAdmin());
+    }
+    match /feedback/{id} {
+      allow read: if isMember() && (resource.data.uid == me() || resource.data.to == me());
+      allow create, update: if isMember() && small() && nd().uid == me() && id == nd().eventId + "__" + me();
+      allow delete: if isMember() && resource.data.uid == me();
+    }
+    match /themes/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && small() && nd().by == me();
+      allow update: if isMember() && small() && nd().by == resource.data.by;
+      allow delete: if isMember() && (resource.data.by == me() || isAdmin());
+    }
+
+    match /contacts/{uid} { allow read, write: if signedIn() && me() == uid; }
+    match /config/{id}    { allow read, write: if isAdmin(); }
+    match /users/{uid}/{document=**} { allow read, write: if signedIn() && me() == uid; }
 
     match /{document=**} { allow read, write: if false; }
   }
