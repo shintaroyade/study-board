@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0B1222">
 <title>英語勉強会ボード</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Unbounded:wght@500;700;800&display=swap">
@@ -53,7 +56,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:12px}
 .brand{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left}
-.logo{width:34px;height:34px;border-radius:10px;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15px;flex:none}
+.logo{width:36px;height:36px;border-radius:11px;background:#0B1222;border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.logo svg{width:30px;height:30px}
 .brand-name{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-sub{display:block;font-size:11px;color:var(--muted);font-family:var(--body);font-weight:500;letter-spacing:.06em}
 .icon-btn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
@@ -262,15 +266,60 @@ canvas#fx{position:fixed;inset:0;z-index:70;pointer-events:none;width:100%;heigh
 .rsvp.mini button{min-height:40px;font-size:13px}
 .ulist{display:flex;gap:6px;flex-wrap:wrap}
 .memo-card{display:flex;flex-direction:column;gap:14px}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+/* ---- splash (loading) : always the dark brand look ---- */
+#splash{position:fixed;inset:0;z-index:100;background:#0B1222;display:grid;place-items:center;transition:opacity .5s ease,visibility .5s}
+#splash.out{opacity:0;visibility:hidden}
+.sp-in{display:flex;flex-direction:column;align-items:center;transition:transform .5s ease}
+#splash.out .sp-in{transform:scale(1.07)}
+.sp-mark{width:136px;height:136px;overflow:visible}
+.sp-mark *{transform-box:view-box}
+.sp-glow{fill:#C6F432;opacity:0;filter:blur(13px);transform-origin:60px 60px;animation:spGlow 1.8s ease-in-out .95s infinite}
+.sp-bubble{fill:none;stroke:#22D3EE;stroke-width:8;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:spDraw .8s cubic-bezier(.65,0,.25,1) .1s forwards}
+.sp-flame{transform-origin:60px 74px;transform:scale(0)}
+.sp-flame.f-outer{fill:#C6F432;animation:spIgnite .5s cubic-bezier(.3,1.7,.5,1) .75s forwards,spFlicker 1.1s ease-in-out 1.25s infinite}
+.sp-flame.f-core{fill:#F3FFD6;animation:spIgnite .45s cubic-bezier(.3,1.7,.5,1) .9s forwards,spFlicker2 .9s ease-in-out 1.35s infinite}
+.sp-ember{fill:#C6F432;opacity:0;animation:spEmber 1.6s ease-out infinite}
+.sp-ember.e1{--dx:-6px;animation-delay:1.3s}
+.sp-ember.e2{--dx:5px;animation-delay:1.85s}
+.sp-ember.e3{--dx:-1px;animation-delay:2.4s}
+.sp-name{margin-top:18px;font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.02em;color:#E8EEF9;opacity:0;transform:translateY(8px);animation:spUp .55s ease 1.05s forwards}
+.sp-sub{margin-top:4px;font-size:10px;font-weight:700;letter-spacing:.22em;color:#8C9AB8;opacity:0;transform:translateY(6px);animation:spUp .55s ease 1.2s forwards}
+.sp-wait{margin-top:22px;font-size:12px;color:#8C9AB8;opacity:0;transition:opacity .4s}
+.sp-wait.on{opacity:1}
+@keyframes spDraw{to{stroke-dashoffset:0}}
+@keyframes spIgnite{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes spFlicker{0%,100%{transform:scale(1,1) skewX(0)}30%{transform:scale(.95,1.07) skewX(-2.5deg)}65%{transform:scale(1.04,.97) skewX(2deg)}}
+@keyframes spFlicker2{0%,100%{transform:scale(1,1)}50%{transform:scale(.9,1.12)}}
+@keyframes spGlow{0%,100%{opacity:.16;transform:scale(.88)}50%{opacity:.4;transform:scale(1.12)}}
+@keyframes spEmber{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),-30px)}}
+@keyframes spUp{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}
+  .sp-bubble{stroke-dashoffset:0}.sp-flame{transform:none}.sp-name,.sp-sub{opacity:1;transform:none}.sp-glow{opacity:.25}}
 </style>
 </head>
 <body>
+<div id="splash" role="status" aria-label="読み込み中">
+  <div class="sp-in">
+    <svg class="sp-mark" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="sp-glow" cx="60" cy="58" r="20"/>
+      <path class="sp-bubble" pathLength="1" d="M38 22h44a20 20 0 0 1 20 20v24a20 20 0 0 1-20 20H54l-22 16 4-16a20 20 0 0 1-18-20V42a20 20 0 0 1 20-20z"/>
+      <path class="sp-flame f-outer" d="M60 32c9 10 15 16 13 28-1.5 8-7 13-13 13-8 0-14-6-13-14 .8-6 6-9 7-15 3 3 4 7 3 11 4-5 5-13 3-23z"/>
+      <path class="sp-flame f-core" d="M60 53c4 5 7 8 6 13-.7 4-3.2 6-6 6-3.8 0-6.5-2.8-6.2-6.5.4-3 3-4.3 3.4-7 1.4 1.4 2 3 1.6 5 1.6-2.4 2.2-6 1.2-10.5z"/>
+      <circle class="sp-ember e1" cx="57" cy="36" r="2.2"/>
+      <circle class="sp-ember e2" cx="63" cy="38" r="1.8"/>
+      <circle class="sp-ember e3" cx="60" cy="34" r="1.6"/>
+    </svg>
+    <div class="sp-name" id="spName">英語勉強会</div>
+    <div class="sp-sub">GRAMMAR × MEMBER LESSONS</div>
+    <div class="sp-wait" id="spWait">読み込み中…</div>
+  </div>
+</div>
+<script>try{var n=localStorage.getItem("appName");if(n)document.getElementById("spName").textContent=n}catch(e){}</script>
 
 <header class="top">
   <div class="wrap">
     <button class="brand" id="brandBtn" aria-label="設定を開く">
-      <span class="logo" id="logo">E</span>
+      <span class="logo" id="logo"><svg viewBox="0 0 120 120" aria-hidden="true"><path d="M38 22h44a20 20 0 0 1 20 20v24a20 20 0 0 1-20 20H54l-22 16 4-16a20 20 0 0 1-18-20V42a20 20 0 0 1 20-20z" fill="none" stroke="#22D3EE" stroke-width="9" stroke-linejoin="round"/><path d="M60 32c9 10 15 16 13 28-1.5 8-7 13-13 13-8 0-14-6-13-14 .8-6 6-9 7-15 3 3 4 7 3 11 4-5 5-13 3-23z" fill="#C6F432"/></svg></span>
       <span style="min-width:0">
         <span class="brand-name" id="appName">英語勉強会(仮)</span>
         <span class="brand-sub">GRAMMAR × MEMBER LESSONS</span>
@@ -600,7 +649,6 @@ function renderMem(){
 
 function renderHeader(){
   $("#appName").textContent=S.appName||"英語勉強会(仮)";
-  $("#logo").textContent=[...(S.appName||"E")][0];
   $("#meBtn").innerHTML = myId&&S.members[myId]?avatar(myId):`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`;
   $("#fab").hidden=!S.canWrite;
   const hb=document.querySelector('nav.tabs [data-tab="home"]'); if(hb) hb.lastChild.textContent=S.auth?"マイホーム":"ホーム";
@@ -873,6 +921,19 @@ function confetti(){
   let f=0;(function loop(){ctx.clearRect(0,0,W,H);for(const p of P){p.vy+=.7*devicePixelRatio;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);ctx.restore()}if(++f<110)requestAnimationFrame(loop);else ctx.clearRect(0,0,W,H)})();
 }
 
+/* ---------- splash ---------- */
+let splashDone=false;
+function hideSplash(){
+  if(splashDone) return; splashDone=true;
+  const el=$("#splash"); if(!el) return;
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const wait=reduce?0:Math.max(0,1900-performance.now());
+  setTimeout(()=>{ el.classList.add("out"); setTimeout(()=>el.remove(),600); },wait);
+}
+function maybeHideSplash(){ if(S.ready.e && S.authReady) hideSplash(); }
+setTimeout(()=>{ const w=$("#spWait"); if(w&&!splashDone) w.classList.add("on"); },3500);
+setTimeout(hideSplash,9000);
+
 /* ---------- boot ---------- */
 applyTheme();
 calMode=ls.get("calMode")==="week"?"week":"month";
@@ -882,16 +943,16 @@ function setStatus(html){$("#status").innerHTML=html}
 (()=>{
   const cfg=window.FIREBASE_CONFIG;
   if(typeof firebase==="undefined"||!cfg||!cfg.apiKey||/ここに/.test(cfg.apiKey)){
-    S.canWrite=false;
+    S.canWrite=false; hideSplash();
     setStatus(`<div class="banner warn">まだデータベースにつながっていません。firebase-config.js にFirebaseの設定を貼り付けてください(手順はREADMEにあります)。</div>`);
     render();return;
   }
   firebase.initializeApp(cfg);
   db=firebase.firestore(); auth=firebase.auth(); auth.languageCode="ja";
   const timer=setTimeout(()=>{ if(!S.ready.e) setStatus(`<div class="banner warn">データにまだ接続できていません。通信状況を確認してください。</div>`) },10000);
-  const fail=e=>{ if(e&&e.code==="permission-denied"&&!auth.currentUser) return; clearTimeout(timer); setStatus(`<div class="banner warn">データを読み込めませんでした(${esc(e&&e.code||"error")})。ページを再読み込みしてください。</div>`) };
-  db.collection("events").onSnapshot(s=>{S.events=s.docs.map(d=>({id:d.id,...d.data()})); if(!s.metadata.fromCache){S.ready.e=1;clearTimeout(timer);setStatus("")} render()},fail);
-  db.doc("settings/app").onSnapshot(s=>{S.appName=s.exists?(s.data().name||""):"";render()},fail);
+  const fail=e=>{ if(e&&e.code==="permission-denied"&&!auth.currentUser) return; clearTimeout(timer); hideSplash(); setStatus(`<div class="banner warn">データを読み込めませんでした(${esc(e&&e.code||"error")})。ページを再読み込みしてください。</div>`) };
+  db.collection("events").onSnapshot(s=>{S.events=s.docs.map(d=>({id:d.id,...d.data()})); if(!s.metadata.fromCache){S.ready.e=1;clearTimeout(timer);setStatus("");maybeHideSplash()} render()},fail);
+  db.doc("settings/app").onSnapshot(s=>{S.appName=s.exists?(s.data().name||""):""; if(S.appName) ls.set("appName",S.appName); else ls.del("appName"); render()},fail);
   auth.onAuthStateChanged(u=>{
     unsubs.forEach(f=>f()); unsubs=[];
     S.auth=u; myId=u?u.uid:null; S.canWrite=!!u; S.authReady=true;
@@ -902,7 +963,7 @@ function setStatus(html){$("#status").innerHTML=html}
       unsubs.push(db.doc("grammar/progress").onSnapshot(s=>{const d=s.exists?s.data():{};S.progress=d.statuses||{};S.progressSample=!!d.sample;render()},fail));
       unsubs.push(db.doc("users/"+u.uid+"/private/notes").onSnapshot(s=>{S.priv=s.exists?s.data():{};render()},fail));
     }
-    render();
+    render(); maybeHideSplash();
   });
 })();
 })();
